@@ -47,12 +47,21 @@ type Event = "keydown" | "keyup" | "keypress";
 
 /** State processing */
 
+type Block = Readonly<{
+  position: { x: number; y: number };
+}>;
+
 type State = Readonly<{
-  gameEnd: boolean
+  gameEnd: boolean;
+  currentBlock: Block | null;
+  nextBlock: Block | null;
 }>;
 
 const initialState: State = {
   gameEnd: false,
+  currentBlock: null,
+  nextBlock: null,
+  // Other initial properties as needed.
 } as const;
 
 /**
@@ -158,9 +167,7 @@ export function main() {
       style: "fill: blue",
       id: 'block'
     });
-    
-
-    console.log("Creating block...");
+  
     svg.appendChild(squareBlock);
     moveBlockDown(s);
 
@@ -204,8 +211,7 @@ export function main() {
     preview.appendChild(cubePreview);
   };
 
-
-
+  // move the block down
   const moveBlockDown = (s: State) => {
     const squareBlock = document.getElementById('block');
     const timer$ = timer(10000);
