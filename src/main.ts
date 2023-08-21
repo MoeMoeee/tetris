@@ -14,8 +14,8 @@
 
 import "./style.css";
 
-import { fromEvent, interval, merge, timer } from "rxjs";
-import { map, filter, scan, takeUntil } from "rxjs/operators";
+import { fromEvent, interval, merge } from "rxjs";
+import { map, filter, scan, takeWhile } from "rxjs/operators";
 
 /** Constants */
 
@@ -27,7 +27,7 @@ const Viewport = {
 } as const;
 
 const Constants = {
-  TICK_RATE_MS: 1000,
+  TICK_RATE_MS: 500,
   GRID_WIDTH: 10,
   GRID_HEIGHT: 20,
 } as const;
@@ -36,6 +36,8 @@ const Block = {
   WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
   HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
 };
+
+
 
 /** User input */
 
@@ -47,30 +49,54 @@ type Event = "keydown" | "keyup" | "keypress";
 
 /** State processing */
 
-type Block = Readonly<{
-  position: { x: number; y: number };
-}>;
+// consist of 4 cubes
+type Tetrominos = {
+  cube1: { x: number; y: number };
+  cube2: { x: number; y: number };
+  cube3: { x: number; y: number };
+  cube4: { x: number; y: number };
+}
 
 type State = Readonly<{
+  currentBlock: Tetrominos,
   gameEnd: boolean;
-  currentBlock: Block | null;
-  nextBlock: Block | null;
 }>;
 
+
+
+const createTetro = () => {
+  return {
+    cube1: {x: 0, y: 0},
+    cube2: {x: Block.WIDTH, y: 0}, 
+    cube3: {x: 0, y: Block.HEIGHT},
+    cube4: {x: Block.WIDTH, y: Block.HEIGHT}
+  };
+}
+
+// Define the initial state using the State type
 const initialState: State = {
   gameEnd: false,
-  currentBlock: null,
-  nextBlock: null,
-  // Other initial properties as needed.
+  currentBlock: createTetro() 
 } as const;
 
-/**
- * Updates the state by proceeding with one time step.
- *
- * @param s Current state
- * @returns Updated state
- */
-const tick = (s: State) => s;
+
+
+const moveTetroDown = (tetro: Tetrominos) => {
+
+
+  return {
+    cube1: { x: tetro.cube1.x, y: tetro.cube1.y + 1 },
+    cube2: { x: tetro.cube2.x, y: tetro.cube2.y + 1 },
+    cube3: { x: tetro.cube3.x, y: tetro.cube3.y + 1 },
+    cube4: { x: tetro.cube4.x, y: tetro.cube4.y + 1 },
+  };
+  
+};
+
+const collide = () => {
+  //TODO: 
+
+}
 
 /** Rendering (side effects) */
 
@@ -152,6 +178,22 @@ export function main() {
   const tick$ = interval(Constants.TICK_RATE_MS);
 
   /**
+ * Updates the state by proceeding with one time step.
+ *
+ * @param s Current state
+ * @returns Updated state
+ */
+  const tick = (s: State) => {
+    console.log('print')
+    const updatedState = {
+      ...s,
+      currentBlock: moveTetroDown(s.currentBlock),
+    };
+    render(updatedState); // Call the rendering function here
+    return updatedState;
+  };
+
+  /**
    * Renders the current state to the canvas.
    *
    * In MVC terms, this updates the View using the Model.
@@ -159,45 +201,48 @@ export function main() {
    * @param s Current state
    */
   const render = (s: State) => {
-    const squareBlock = createSvgElement(svg.namespaceURI, "rect", {
-      height: `${Block.HEIGHT*2}`,
-      width: `${Block.WIDTH*2}`,
-      x: "0",
-      y: "0",
-      style: "fill: blue",
-      id: 'block'
+    // Create the top-left rectangle
+    const rect1 = createSvgElement(preview.namespaceURI, "rect", {
+      height: `${Block.HEIGHT}`,
+      width: `${Block.WIDTH}`,
+      x: `${s.currentBlock.cube1.x}`,
+      y: `${s.currentBlock.cube1.y}`,
+      style: "fill: green",
     });
-  
-    svg.appendChild(squareBlock);
-    moveBlockDown(s);
-
+    svg.appendChild(rect1);
     
-    // const cube = createSvgElement(svg.namespaceURI, "rect", {
-    //   height: `${Block.HEIGHT}`,
-    //   width: `${Block.WIDTH}`,
-    //   x: "0",
-    //   y: "0",
-    //   style: "fill: green",
-    // });
-    // svg.appendChild(cube);
 
-    const cube2 = createSvgElement(svg.namespaceURI, "rect", {
+    // Create the top-right rectangle
+    const rect2 = createSvgElement(preview.namespaceURI, "rect", {
       height: `${Block.HEIGHT}`,
       width: `${Block.WIDTH}`,
-      x: `${Block.WIDTH * (3 - 1)}`,
-      y: `${Block.HEIGHT * (20 - 1)}`,
-      style: "fill: red",
+      x: `${s.currentBlock.cube2.x}`,
+      y: `${s.currentBlock.cube2.y}`,
+      style: "fill: green",
     });
-    svg.appendChild(cube2);
-
-    const cube3 = createSvgElement(svg.namespaceURI, "rect", {
+    svg.appendChild(rect2);
+  
+    // Create the bottom-left rectangle
+    const rect3 = createSvgElement(preview.namespaceURI, "rect", {
       height: `${Block.HEIGHT}`,
       width: `${Block.WIDTH}`,
-      x: `${Block.WIDTH * (4 - 1)}`,
-      y: `${Block.HEIGHT * (20 - 1)}`,
-      style: "fill: red",
+      x: `${s.currentBlock.cube3.x}`,
+      y: `${s.currentBlock.cube3.y}`,
+      style: "fill: green",
     });
-    svg.appendChild(cube3);
+    svg.appendChild(rect3);
+  
+    // Create the bottom-right rectangle
+    const rect4 = createSvgElement(preview.namespaceURI, "rect", {
+      height: `${Block.HEIGHT}`,
+      width: `${Block.WIDTH}`,
+      x: `${s.currentBlock.cube4.x}`,
+      y: `${s.currentBlock.cube4.y}`,
+      style: "fill: green",
+    });
+    svg.appendChild(rect4);
+
+  
 
     // Add a block to the preview canvas
     const cubePreview = createSvgElement(preview.namespaceURI, "rect", {
@@ -207,45 +252,27 @@ export function main() {
       y: `${Block.HEIGHT}`,
       style: "fill: green",
     });
-    
     preview.appendChild(cubePreview);
+
   };
 
-  // move the block down
-  const moveBlockDown = (s: State) => {
-    const squareBlock = document.getElementById('block');
-    const timer$ = timer(10000);
-  
-    const move$ = tick$
-      .pipe(
-        takeUntil(timer$)
-      )
-      .subscribe(() => {
-
-        if (squareBlock)
-          { 
-          const currentY = parseInt(squareBlock.getAttribute("y") || "0");
-          const newY = currentY + 1;
-          squareBlock.setAttribute("y", String(newY));
-          } 
-      });
-  };
-  
 
   const source$ = merge(tick$)
-    .pipe(scan((s: State) => ({ gameEnd: false }), initialState))
-    .subscribe((s: State) => {
+  .pipe(
+    scan((s: State) => tick(s), initialState), 
 
-      if (s.gameEnd) {
-        show(gameover);
-      } else {
-        hide(gameover);
-        render(s);
-      }
-    });
+  )
+  .subscribe((s: State) => {
+    render(s);
+    if (s.gameEnd) {
+      show(gameover);
+    } else {
+      hide(gameover);
+    }
+  });
 }
 
-// The following simply runs your main function on window load.  Make sure to leave it in place.
+// The following simply runs your main function on window load. Make sure to leave it in place.
 if (typeof window !== "undefined") {
   window.onload = () => {
     main();
