@@ -14,7 +14,7 @@
 
 import "./style.css";
 
-import { fromEvent, interval, merge } from "rxjs";
+import { Observable, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
 
 /** Constants */
@@ -82,8 +82,6 @@ const initialState: State = {
 
 
 const moveTetroDown = (tetro: Tetrominos) => {
-
-
   return {
     cube1: { x: tetro.cube1.x, y: tetro.cube1.y + 1 },
     cube2: { x: tetro.cube2.x, y: tetro.cube2.y + 1 },
@@ -165,14 +163,46 @@ export function main() {
 
   const key$ = fromEvent<KeyboardEvent>(document, "keypress");
 
-  const fromKey = (keyCode: Key) =>
-    key$.pipe(filter(({ code }) => code === keyCode));
+  const fromKey = (keyCode: string, moveDistance: number, axis: string): Observable<{moveDistance: number, axis: string}> =>
+    key$.pipe(
+      filter(({ code }) => code === keyCode),
+      map(() => ({ moveDistance, axis }))
+    );
 
-  const left$ = fromKey("KeyA");
-  const right$ = fromKey("KeyD");
-  const down$ = fromKey("KeyS");
+
+  const left$ = fromKey("KeyA", -5, "x");
+  const right$ = fromKey("KeyD", 5, "x");
+  const down$ = fromKey("KeyS", 5, "y");
 
   /** Observables */
+  const moveBlock$ = merge(left$, right$, down$)
+  .pipe(
+    scan((acc: State, { moveDistance, axis }) => ({
+      ...acc,
+      currentBlock: moveBlock(acc, moveDistance, axis),
+    }), initialState)
+  )
+  
+
+  const moveBlock = (s: State, moveDistance: number, axis: string) => {
+    const updatedBlock = {
+      cube1: moveCube(s.currentBlock.cube1, moveDistance, axis),
+      cube2: moveCube(s.currentBlock.cube2, moveDistance, axis),
+      cube3: moveCube(s.currentBlock.cube3, moveDistance, axis),
+      cube4: moveCube(s.currentBlock.cube4, moveDistance, axis),
+    };
+
+    console.log(s.currentBlock.cube1.x);
+    return updatedBlock;
+    // return isCollision(updatedBlock) ? s.currentBlock : updatedBlock;
+  };
+  
+  const moveCube = (cube: { x: number; y: number }, moveDistance: number, axis: string) => ({
+    ...cube,
+    [axis]: axis === 'x' ? cube.x + moveDistance : cube.x,
+    [axis === 'y' ? 'y' : 'x']: axis === 'y' ? cube.y + moveDistance : cube.y,
+  });
+  
 
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
@@ -184,7 +214,6 @@ export function main() {
  * @returns Updated state
  */
   const tick = (s: State) => {
-    console.log('print')
     const updatedState = {
       ...s,
       currentBlock: moveTetroDown(s.currentBlock),
@@ -201,6 +230,8 @@ export function main() {
    * @param s Current state
    */
   const render = (s: State) => {
+    svg.innerHTML = "";
+
     // Create the top-left rectangle
     const rect1 = createSvgElement(preview.namespaceURI, "rect", {
       height: `${Block.HEIGHT}`,
@@ -257,10 +288,9 @@ export function main() {
   };
 
 
-  const source$ = merge(tick$)
+  const source$ = merge(tick$, moveBlock$)
   .pipe(
     scan((s: State) => tick(s), initialState), 
-
   )
   .subscribe((s: State) => {
     render(s);
