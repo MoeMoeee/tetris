@@ -219,7 +219,6 @@ export function main() {
       ...s,
       currentBlock: moveTetroDown(s.currentBlock),
     };
-    render(updatedState); // Call the rendering function here
     return updatedState;
   };
 
