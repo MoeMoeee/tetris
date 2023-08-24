@@ -197,11 +197,12 @@ export function main() {
     // return isCollision(updatedBlock) ? s.currentBlock : updatedBlock;
   };
   
-  const moveCube = (cube: { x: number; y: number }, moveDistance: number, axis: string) => ({
-    ...cube,
-    [axis]: axis === 'x' ? cube.x + moveDistance : cube.x,
-    [axis === 'y' ? 'y' : 'x']: axis === 'y' ? cube.y + moveDistance : cube.y,
-  });
+  const moveCube = (cube: { x: number; y: number }, moveDistance: number, axis: string) => (
+    {
+      x: axis === 'x'? cube.x + moveDistance : cube.x,
+      y: axis === 'y'? cube.y + moveDistance : cube.y
+    }
+  )
   
 
   /** Determines the rate of time steps */
