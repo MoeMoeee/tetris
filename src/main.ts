@@ -14,53 +14,11 @@
 
 import "./style.css";
 
-import { Observable, fromEvent, interval, merge } from "rxjs";
+import { Observable, concat, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
-
+import {hide, show, createSvgElement} from "./utils";
+import { Key, Event, Tetrominos, State, Block, Viewport, Constants } from './types'
 /** Constants */
-
-const Viewport = {
-  CANVAS_WIDTH: 200,
-  CANVAS_HEIGHT: 400,
-  PREVIEW_WIDTH: 160,
-  PREVIEW_HEIGHT: 80,
-} as const;
-
-const Constants = {
-  TICK_RATE_MS: 500,
-  GRID_WIDTH: 10,
-  GRID_HEIGHT: 20,
-} as const;
-
-const Block = {
-  WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
-  HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
-};
-
-
-
-/** User input */
-
-type Key = "KeyS" | "KeyA" | "KeyD";
-
-type Event = "keydown" | "keyup" | "keypress";
-
-/** Utility functions */
-
-/** State processing */
-
-// consist of 4 cubes
-type Tetrominos = {
-  cube1: { x: number; y: number };
-  cube2: { x: number; y: number };
-  cube3: { x: number; y: number };
-  cube4: { x: number; y: number };
-}
-
-type State = Readonly<{
-  currentBlock: Tetrominos,
-  gameEnd: boolean;
-}>;
 
 
 
@@ -88,7 +46,6 @@ const moveTetroDown = (tetro: Tetrominos) => {
     cube3: { x: tetro.cube3.x, y: tetro.cube3.y + 1 },
     cube4: { x: tetro.cube4.x, y: tetro.cube4.y + 1 },
   };
-  
 };
 
 const collide = () => {
@@ -96,44 +53,7 @@ const collide = () => {
 
 }
 
-/** Rendering (side effects) */
 
-/**
- * Displays a SVG element on the canvas. Brings to foreground.
- * @param elem SVG element to display
- */
-const show = (elem: SVGGraphicsElement) => {
-  elem.setAttribute("visibility", "visible");
-  elem.parentNode!.appendChild(elem);
-};
-
-/**
- * Hides a SVG element on the canvas.
- * @param elem SVG element to hide
- */
-const hide = (elem: SVGGraphicsElement) =>
-  elem.setAttribute("visibility", "hidden");
-
-/**
- * Creates an SVG element with the given properties.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/SVG/Element for valid
- * element names and properties.
- *
- * @param namespace Namespace of the SVG element
- * @param name SVGElement name
- * @param props Properties to set on the SVG element
- * @returns SVG element
- */
-const createSvgElement = (
-  namespace: string | null,
-  name: string,
-  props: Record<string, string> = {}
-) => {
-  const elem = document.createElementNS(namespace, name) as SVGElement;
-  Object.entries(props).forEach(([k, v]) => elem.setAttribute(k, v));
-  return elem;
-};
 
 /**
  * This is the function called on page load. Your main game loop
@@ -185,6 +105,7 @@ export function main() {
   
 
   const moveBlock = (s: State, moveDistance: number, axis: string) => {
+  
     const updatedBlock = {
       cube1: moveCube(s.currentBlock.cube1, moveDistance, axis),
       cube2: moveCube(s.currentBlock.cube2, moveDistance, axis),
@@ -192,7 +113,6 @@ export function main() {
       cube4: moveCube(s.currentBlock.cube4, moveDistance, axis),
     };
 
-    console.log(s.currentBlock.cube1.x);
     return updatedBlock;
     // return isCollision(updatedBlock) ? s.currentBlock : updatedBlock;
   };
@@ -215,10 +135,14 @@ export function main() {
  * @returns Updated state
  */
   const tick = (s: State) => {
+    console.log('tick');
+    
+
     const updatedState = {
       ...s,
       currentBlock: moveTetroDown(s.currentBlock),
     };
+
     return updatedState;
   };
 
@@ -288,9 +212,11 @@ export function main() {
   };
 
 
+
   const source$ = merge(tick$, moveBlock$)
   .pipe(
-    scan((s: State) => tick(s), initialState), 
+    scan((s: State,) => tick(s), initialState), 
+
   )
   .subscribe((s: State) => {
     render(s);
