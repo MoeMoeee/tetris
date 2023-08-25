@@ -18,7 +18,6 @@ import { Observable, concat, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
 import {hide, show, createSvgElement} from "./utils";
 import { Key, Event, Tetrominos, State, Block, Viewport, Constants } from './types'
-/** Constants */
 
 
 
@@ -208,15 +207,13 @@ export function main() {
       style: "fill: green",
     });
     preview.appendChild(cubePreview);
-
   };
 
 
 
   const source$ = merge(tick$, moveBlock$)
   .pipe(
-    scan((s: State,) => tick(s), initialState), 
-
+    scan((s: State,) => tick(s), initialState)
   )
   .subscribe((s: State) => {
     render(s);
