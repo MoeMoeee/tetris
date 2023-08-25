@@ -71,8 +71,6 @@ export function main() {
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
 
-
-
   /**
    * Renders the current state to the canvas.
    *

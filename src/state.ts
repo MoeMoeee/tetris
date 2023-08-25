@@ -1,4 +1,4 @@
-import { Action, Block, State, Tetrominos } from "./types";
+import { Action, Block, State, Tetrominos, Viewport } from "./types";
 
 export { initialState, reduceState, Rotate, Tick, Move }
 
@@ -23,19 +23,46 @@ currentBlock: createTetro()
 class Move implements Action {
     constructor(public readonly moveDistance: number, public readonly axis: string) { } 
 
-    static moveCube = (cube: { x: number; y: number }, moveDistance: number, axis: string) => (
-        {
-          x: axis === 'x'? cube.x + moveDistance : cube.x,
-          y: axis === 'y'? cube.y + moveDistance : cube.y
-        }
-      )
 
-    static moveBlock = (s: State, moveDistance: number, axis: string) => ({
-        cube1: Move.moveCube(s.currentBlock.cube1, moveDistance, axis),
-        cube2: Move.moveCube(s.currentBlock.cube2, moveDistance, axis),
-        cube3: Move.moveCube(s.currentBlock.cube3, moveDistance, axis),
-        cube4: Move.moveCube(s.currentBlock.cube4, moveDistance, axis),
-    })
+    static isBlockInsideScreen = (s: State, moveDistance: number, axis: string): boolean => {
+        const { cube1, cube2, cube3, cube4 } = s.currentBlock;
+      
+        if (axis === 'x') {
+          return (
+            (cube1.x + moveDistance >= 0 && cube1.x + moveDistance < Viewport.CANVAS_WIDTH-15) &&
+            (cube2.x + moveDistance >= 0 && cube2.x + moveDistance < Viewport.CANVAS_WIDTH-15) &&
+            (cube3.x + moveDistance >= 0 && cube3.x + moveDistance < Viewport.CANVAS_WIDTH-15) &&
+            (cube4.x + moveDistance >= 0 && cube4.x + moveDistance < Viewport.CANVAS_WIDTH-15)
+          );
+        } else if (axis === 'y') {
+          return (
+            (cube1.y + moveDistance >= 0 && cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT-15) &&
+            (cube2.y + moveDistance >= 0 && cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT-15) &&
+            (cube3.y + moveDistance >= 0 && cube3.y + moveDistance <= Viewport.CANVAS_HEIGHT-15) &&
+            (cube4.y + moveDistance >= 0 && cube4.y + moveDistance <= Viewport.CANVAS_HEIGHT-15)
+          );
+        }
+
+        return false;
+      };
+      
+
+    static moveCube = (s: State, cube: { x: number; y: number }, moveDistance: number, axis: string) => {
+        return {
+            x: axis === 'x' ? cube.x + moveDistance: cube.x,
+            y: axis === 'y' ? cube.y + moveDistance : cube.y
+        };
+    };
+      
+
+    static moveBlock = (s: State, moveDistance: number, axis: string) => (
+        Move.isBlockInsideScreen(s, moveDistance, axis) ? {
+            cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
+            cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
+            cube3: Move.moveCube(s, s.currentBlock.cube3, moveDistance, axis),
+            cube4: Move.moveCube(s, s.currentBlock.cube4, moveDistance, axis),
+        } : s.currentBlock
+    );
 
     // need to fix this
     apply = (s: State) => {
@@ -64,7 +91,6 @@ class Rotate implements Action {
 
 
 class Tick implements Action {
-    constructor(public readonly state: State) { }
     static moveTetroDown = (tetro: Tetrominos) => {
         return {
           cube1: { x: tetro.cube1.x, y: tetro.cube1.y + 1 },
