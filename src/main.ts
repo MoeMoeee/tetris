@@ -17,41 +17,8 @@ import "./style.css";
 import { Observable, concat, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
 import {hide, show, createSvgElement} from "./utils";
-import { Key, Event, Tetrominos, State, Block, Viewport, Constants } from './types'
-
-
-
-const createTetro = () => {
-  return {
-    cube1: {x: 0, y: 0},
-    cube2: {x: Block.WIDTH, y: 0}, 
-    cube3: {x: 0, y: Block.HEIGHT},
-    cube4: {x: Block.WIDTH, y: Block.HEIGHT}
-  };
-}
-
-// Define the initial state using the State type
-const initialState: State = {
-  gameEnd: false,
-  currentBlock: createTetro() 
-} as const;
-
-
-
-const moveTetroDown = (tetro: Tetrominos) => {
-  return {
-    cube1: { x: tetro.cube1.x, y: tetro.cube1.y + 1 },
-    cube2: { x: tetro.cube2.x, y: tetro.cube2.y + 1 },
-    cube3: { x: tetro.cube3.x, y: tetro.cube3.y + 1 },
-    cube4: { x: tetro.cube4.x, y: tetro.cube4.y + 1 },
-  };
-};
-
-const collide = () => {
-  //TODO: 
-
-}
-
+import { Key, Event, Tetrominos, State, Block, Viewport, Constants, Action } from './types'
+import { initialState, reduceState, Rotate, Tick, Move } from './state';
 
 
 /**
@@ -82,68 +49,29 @@ export function main() {
 
   const key$ = fromEvent<KeyboardEvent>(document, "keypress");
 
-  const fromKey = (keyCode: string, moveDistance: number, axis: string): Observable<{moveDistance: number, axis: string}> =>
+  const fromKey = (keyCode: string) =>
     key$.pipe(
       filter(({ code }) => code === keyCode),
-      map(() => ({ moveDistance, axis }))
     );
 
 
-  const left$ = fromKey("KeyA", -5, "x");
-  const right$ = fromKey("KeyD", 5, "x");
-  const down$ = fromKey("KeyS", 5, "y");
+  const left$ = fromKey("KeyA");
+  const right$ = fromKey("KeyD");
+  const down$ = fromKey("KeyS");
 
   /** Observables */
-  const moveBlock$ = merge(left$, right$, down$)
-  .pipe(
-    scan((acc: State, { moveDistance, axis }) => ({
-      ...acc,
-      currentBlock: moveBlock(acc, moveDistance, axis),
-    }), initialState)
-  )
+    
+  const moveLeft$ = left$.pipe(map(_ => new Move(-5, "x")));
+  const moveRight$ = right$.pipe(map(_ => new Move(5, "x")));
+  const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
+    
   
 
-  const moveBlock = (s: State, moveDistance: number, axis: string) => {
-  
-    const updatedBlock = {
-      cube1: moveCube(s.currentBlock.cube1, moveDistance, axis),
-      cube2: moveCube(s.currentBlock.cube2, moveDistance, axis),
-      cube3: moveCube(s.currentBlock.cube3, moveDistance, axis),
-      cube4: moveCube(s.currentBlock.cube4, moveDistance, axis),
-    };
-
-    return updatedBlock;
-    // return isCollision(updatedBlock) ? s.currentBlock : updatedBlock;
-  };
-  
-  const moveCube = (cube: { x: number; y: number }, moveDistance: number, axis: string) => (
-    {
-      x: axis === 'x'? cube.x + moveDistance : cube.x,
-      y: axis === 'y'? cube.y + moveDistance : cube.y
-    }
-  )
-  
 
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
 
-  /**
- * Updates the state by proceeding with one time step.
- *
- * @param s Current state
- * @returns Updated state
- */
-  const tick = (s: State) => {
-    console.log('tick');
-    
 
-    const updatedState = {
-      ...s,
-      currentBlock: moveTetroDown(s.currentBlock),
-    };
-
-    return updatedState;
-  };
 
   /**
    * Renders the current state to the canvas.
@@ -209,13 +137,11 @@ export function main() {
     preview.appendChild(cubePreview);
   };
 
-
-
-  const source$ = merge(tick$, moveBlock$)
-  .pipe(
-    scan((s: State,) => tick(s), initialState)
-  )
-  .subscribe((s: State) => {
+  const gameClock$ = tick$.pipe(scan(() => new Tick(), initialState));
+  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$);
+  const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
+  const subscription = 
+  state$.subscribe((s: State) => {
     render(s);
     if (s.gameEnd) {
       show(gameover);
