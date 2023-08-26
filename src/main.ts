@@ -55,12 +55,13 @@ export function main() {
     );
 
 
+
+
+  /** Observables */
   const left$ = fromKey("KeyA");
   const right$ = fromKey("KeyD");
   const down$ = fromKey("KeyS");
-
-  /** Observables */
-    
+  
   const moveLeft$ = left$.pipe(map(_ => new Move(-5, "x")));
   const moveRight$ = right$.pipe(map(_ => new Move(5, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));

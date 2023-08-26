@@ -1,17 +1,10 @@
 import { Action, Block, State, Tetrominos, Viewport } from "./types";
+import { createTetro } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
 
 
-// create initial place for the tetro
-const createTetro = () => {
-    return {
-      cube1: {x: 0, y: 0},
-      cube2: {x: Block.WIDTH, y: 0}, 
-      cube3: {x: 0, y: Block.HEIGHT},
-      cube4: {x: Block.WIDTH, y: Block.HEIGHT}
-    };
-  }
+
   
 // Define the initial state using the State type
 const initialState: State = {
@@ -22,7 +15,6 @@ currentBlock: createTetro()
 
 class Move implements Action {
     constructor(public readonly moveDistance: number, public readonly axis: string) { } 
-
 
     static isBlockInsideScreen = (s: State, moveDistance: number, axis: string): boolean => {
         const { cube1, cube2, cube3, cube4 } = s.currentBlock;
@@ -64,7 +56,6 @@ class Move implements Action {
         } : s.currentBlock
     );
 
-    // need to fix this
     apply = (s: State) => {
         const updatedBlock = {
             ...s,
@@ -81,7 +72,7 @@ class Rotate implements Action {
     apply = (s: State) => {
         const updatedState = {
         ...s,
-        currentBlock: Tick.moveTetroDown(s.currentBlock),
+        currentBlock: Tick.moveTetroDown(s),
         };
 
         return updatedState;
@@ -91,16 +82,16 @@ class Rotate implements Action {
 
 
 class Tick implements Action {
-    static moveTetroDown = (tetro: Tetrominos) => {
-        return {
-          cube1: { x: tetro.cube1.x, y: tetro.cube1.y + 1 },
-          cube2: { x: tetro.cube2.x, y: tetro.cube2.y + 1 },
-          cube3: { x: tetro.cube3.x, y: tetro.cube3.y + 1 },
-          cube4: { x: tetro.cube4.x, y: tetro.cube4.y + 1 },
-        };
-      };
+    static moveTetroDown = (s: State) => (
+        Move.isBlockInsideScreen(s, 2, "y") ? {
+          cube1: { x: s.currentBlock.cube1.x, y: s.currentBlock.cube1.y + 1 },
+          cube2: { x: s.currentBlock.cube2.x, y: s.currentBlock.cube2.y + 1 },
+          cube3: { x: s.currentBlock.cube3.x, y: s.currentBlock.cube3.y + 1 },
+          cube4: { x: s.currentBlock.cube4.x, y: s.currentBlock.cube4.y + 1 },
+        } : s.currentBlock
+    );
     
-    static handleCollisions = (s: State): State => s; //TODO
+    // static handleCollisions = (s: State): State => s; //TODO
 
     /**
      * Updates the state by proceeding with one time step.
@@ -111,7 +102,7 @@ class Tick implements Action {
     apply = (s: State) => {
         const updatedState = {
         ...s,
-        currentBlock: Tick.moveTetroDown(s.currentBlock),
+        currentBlock: Tick.moveTetroDown(s),
         };
 
         return updatedState;
