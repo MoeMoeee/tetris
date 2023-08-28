@@ -107,26 +107,39 @@ class Rotate implements Action {
 
   // TODO
   apply = (s: State) => {
-    const updatedState = {
-    ...s,
-    currentBlock: Tick.moveTetroDown(s),
-    };
-
-    return updatedState;
+    return s;
   };
 };
 
 
 
 class Tick implements Action {
-  static moveTetroDown = (s: State) => (
-    Move.isBlockInsideScreen(s, 5, "y") ? {
-      cube1: { x: s.currentBlock.cube1.x, y: s.currentBlock.cube1.y + 1 },
-      cube2: { x: s.currentBlock.cube2.x, y: s.currentBlock.cube2.y + 1 },
-      cube3: { x: s.currentBlock.cube3.x, y: s.currentBlock.cube3.y + 1 },
-      cube4: { x: s.currentBlock.cube4.x, y: s.currentBlock.cube4.y + 1 },
-    } : s.currentBlock
-  );
+
+  static moveTetroDown = (s: State): State => {
+    if (Move.isBlockInsideScreen(s, 5, "y")) {
+      const newBlock = {
+        cube1: Move.moveCube(s, s.currentBlock.cube1, 1, "y"),
+        cube2: Move.moveCube(s, s.currentBlock.cube2, 1, "y"),
+        cube3: Move.moveCube(s, s.currentBlock.cube3, 1, "y"),
+        cube4: Move.moveCube(s, s.currentBlock.cube4, 1, "y"),
+      };
+      return {
+        ...s,
+        currentBlock: newBlock  
+      };
+    }
+
+    else {
+      const currentBlock = s.currentBlock;
+      const newBlock = generateNewBlock(s); 
+
+      return {
+        ...s,
+        allBlocks: s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, currentBlock],
+        currentBlock: newBlock  
+      };
+    }
+  };
     
   // static handleCollisions = (s: State): State => s; //TODO
 
@@ -137,14 +150,8 @@ class Tick implements Action {
    * @returns Updated state
      */
   apply = (s: State) => {
-    const updatedState = {
-    ...s,
-    currentBlock: Tick.moveTetroDown(s),
-    };
-
-    return updatedState;
+    return Tick.moveTetroDown(s);
   };
-
 }
 
 
