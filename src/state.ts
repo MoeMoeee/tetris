@@ -12,7 +12,7 @@ gameEnd: false,
 currentBlock: createTetro(),
 score: 0,
 highScore: 0,
-allBlocks: null
+allBlocks: null,
 } as const;
 
 
@@ -29,9 +29,8 @@ class Move implements Action {
         (cube3.x + moveDistance >= 0 && cube3.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
         (cube4.x + moveDistance >= 0 && cube4.x + moveDistance < Viewport.CANVAS_WIDTH - 15)
       );
-    } else if (axis === 'y') {
-
-
+    } 
+    else if (axis === 'y') {
       return (
         (cube1.y + moveDistance >= 0 && cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
         (cube2.y + moveDistance >= 0 && cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
@@ -51,34 +50,56 @@ class Move implements Action {
     };
   };
 
-
-  static moveBlock = (s: State, moveDistance: number, axis: string): Tetrominos => {
+  static moveBlock = (s: State, moveDistance: number, axis: string): State => {
     if (Move.isBlockInsideScreen(s, moveDistance, axis)) {
-      return {
+      const newBlock = {
         cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
         cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
         cube3: Move.moveCube(s, s.currentBlock.cube3, moveDistance, axis),
         cube4: Move.moveCube(s, s.currentBlock.cube4, moveDistance, axis),
       };
+      return {
+        ...s,
+        currentBlock: newBlock  
+      };
     } 
+
     else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') {
-      // generate new block when we reach the bottom of the game
-      const newBlock = generateNewBlock(s);
-      return newBlock;
-    } 
-    else {
-      return s.currentBlock;
+      const currentBlock = s.currentBlock;
+      const newBlock = generateNewBlock(s); 
+
+      return {
+        ...s,
+        allBlocks: s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, currentBlock],
+        currentBlock: newBlock  
+      };
     }
-  };
+    
+    else {
+      const newBlock = s.currentBlock; 
+      return {
+        ...s,
+        currentBlock: newBlock  
+      };
+    }
+
+  }
+  
+
+        
     
 
-  apply = (s: State) => {
-    const updatedBlock = {
-      ...s,
-      currentBlock: Move.moveBlock(s, this.moveDistance, this.axis)
-      };
+  // apply = (s: State) => {
+  //   const updatedBlock = {
+  //     ...s,
+  //     currentBlock: Move.moveBlock(s, this.moveDistance, this.axis)
+  //     };
 
-    return updatedBlock;
+  //   return updatedBlock;
+  // };
+
+  apply = (s: State) => {
+    return Move.moveBlock(s, this.moveDistance, this.axis)
   };
 };
 

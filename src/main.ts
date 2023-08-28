@@ -82,47 +82,33 @@ export function main() {
   const render = (s: State) => {
     svg.innerHTML = "";
 
-    // Create the top-left rectangle
-    const rect1 = createSvgElement(preview.namespaceURI, "rect", {
-      height: `${Block.HEIGHT}`,
-      width: `${Block.WIDTH}`,
-      x: `${s.currentBlock.cube1.x}`,
-      y: `${s.currentBlock.cube1.y}`,
-      style: "fill: green",
+    Object.values(s.currentBlock).forEach(cube => {
+      const rect = createSvgElement(preview.namespaceURI, "rect", {
+        height: `${Block.HEIGHT}`,
+        width: `${Block.WIDTH}`,
+        x: `${cube.x}`,
+        y: `${cube.y}`,
+        style: "fill: green",
+      });
+      svg.appendChild(rect);
     });
-    svg.appendChild(rect1);
+
+    if (s.allBlocks !== null) {
+      s.allBlocks.forEach(block => {
+        Object.values(block).forEach(cube => {
+          const rect = createSvgElement(preview.namespaceURI, "rect", {
+            height: `${Block.HEIGHT}`,
+            width: `${Block.WIDTH}`,
+            x: `${cube.x}`,
+            y: `${cube.y}`,
+            style: "fill: green",
+          });
+          svg.appendChild(rect);
+        });
+      });
+    }
+
     
-
-    // Create the top-right rectangle
-    const rect2 = createSvgElement(preview.namespaceURI, "rect", {
-      height: `${Block.HEIGHT}`,
-      width: `${Block.WIDTH}`,
-      x: `${s.currentBlock.cube2.x}`,
-      y: `${s.currentBlock.cube2.y}`,
-      style: "fill: green",
-    });
-    svg.appendChild(rect2);
-  
-    // Create the bottom-left rectangle
-    const rect3 = createSvgElement(preview.namespaceURI, "rect", {
-      height: `${Block.HEIGHT}`,
-      width: `${Block.WIDTH}`,
-      x: `${s.currentBlock.cube3.x}`,
-      y: `${s.currentBlock.cube3.y}`,
-      style: "fill: green",
-    });
-    svg.appendChild(rect3);
-  
-    // Create the bottom-right rectangle
-    const rect4 = createSvgElement(preview.namespaceURI, "rect", {
-      height: `${Block.HEIGHT}`,
-      width: `${Block.WIDTH}`,
-      x: `${s.currentBlock.cube4.x}`,
-      y: `${s.currentBlock.cube4.y}`,
-      style: "fill: green",
-    });
-    svg.appendChild(rect4);
-
   
 
     // Add a block to the preview canvas

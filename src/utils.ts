@@ -55,7 +55,7 @@ const show = (elem: SVGGraphicsElement) => {
   };
 
 
-  const generateNewBlock = (s: State) => { 
+  const generateNewBlock = (s: State) => {
     return {
       cube1: {x: 0, y: 0},
       cube2: {x: Block.WIDTH, y: 0}, 
