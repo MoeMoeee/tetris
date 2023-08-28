@@ -43,7 +43,9 @@ cube4: { x: number; y: number };
 
 type State = Readonly<{
 currentBlock: Tetrominos,
-gameEnd: boolean;
+gameEnd: boolean,
+score: number,
+highScore: number
 }>;
   
 /**
