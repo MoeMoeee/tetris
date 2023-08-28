@@ -32,10 +32,10 @@ class Move implements Action {
     } 
     else if (axis === 'y') {
       return (
-        (cube1.y + moveDistance >= 0 && cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
-        (cube2.y + moveDistance >= 0 && cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
-        (cube3.y + moveDistance >= 0 && cube3.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
-        (cube4.y + moveDistance >= 0 && cube4.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17)
+        (cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube3.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube4.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15)
       );
     }
 
@@ -45,13 +45,13 @@ class Move implements Action {
 
   static moveCube = (s: State, cube: { x: number; y: number }, moveDistance: number, axis: string) => {
     return {
-      x: axis === 'x' ? cube.x + moveDistance: cube.x,
+      x: axis === 'x' ? cube.x + moveDistance : cube.x,
       y: axis === 'y' ? cube.y + moveDistance : cube.y
     };
   };
 
   static moveBlock = (s: State, moveDistance: number, axis: string): State => {
-    if (Move.isBlockInsideScreen(s, moveDistance, axis)) {
+    if (Move.isBlockInsideScreen(s, moveDistance+4, axis)) {
       const newBlock = {
         cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
         cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),

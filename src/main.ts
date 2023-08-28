@@ -62,8 +62,8 @@ export function main() {
   const right$ = fromKey("KeyD");
   const down$ = fromKey("KeyS");
   
-  const moveLeft$ = left$.pipe(map(_ => new Move(-5, "x")));
-  const moveRight$ = right$.pipe(map(_ => new Move(5, "x")));
+  const moveLeft$ = left$.pipe(map(_ => new Move(- Block.WIDTH , "x")));
+  const moveRight$ = right$.pipe(map(_ => new Move(Block.WIDTH, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
     
   
