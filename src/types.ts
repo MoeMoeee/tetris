@@ -45,7 +45,8 @@ type State = Readonly<{
 currentBlock: Tetrominos,
 gameEnd: boolean,
 score: number,
-highScore: number
+highScore: number,
+allBlocks: Array<Tetrominos> | null
 }>;
   
 /**

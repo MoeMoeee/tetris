@@ -1,6 +1,6 @@
 import { Block, State, Viewport } from "./types";
 
-export {hide, show, createSvgElement, createTetro}
+export {hide, show, createSvgElement, createTetro, generateNewBlock}
 
 
 
@@ -13,16 +13,6 @@ const createTetro = () => {
       cube4: {x: Block.WIDTH, y: Block.HEIGHT}
     };
 }
-
-
-
-// const isReachBottom = (s: State) => 
-//     s.currentBlock.cube1.y + 1 === Viewport.CANVAS_HEIGHT-15 ||
-//     s.currentBlock.cube1.y + 1 === Viewport.CANVAS_HEIGHT-15 ||
-//     s.currentBlock.cube1.y + 1 === Viewport.CANVAS_HEIGHT-15 ||
-//     s.currentBlock.cube1.y + 1 === Viewport.CANVAS_HEIGHT-15
-//     console.log('REach');
-//   ;
 
 
 /** Rendering (side effects) */
@@ -63,3 +53,13 @@ const show = (elem: SVGGraphicsElement) => {
     Object.entries(props).forEach(([k, v]) => elem.setAttribute(k, v));
     return elem;
   };
+
+
+  const generateNewBlock = (s: State) => { 
+    return {
+      cube1: {x: 0, y: 0},
+      cube2: {x: Block.WIDTH, y: 0}, 
+      cube3: {x: 0, y: Block.HEIGHT},
+      cube4: {x: Block.WIDTH, y: Block.HEIGHT}
+    };
+  }

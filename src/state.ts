@@ -1,5 +1,5 @@
 import { Action, Block, State, Tetrominos, Viewport } from "./types";
-import { createTetro } from "./utils";
+import { createTetro, generateNewBlock } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
 
@@ -12,6 +12,7 @@ gameEnd: false,
 currentBlock: createTetro(),
 score: 0,
 highScore: 0,
+allBlocks: null
 } as const;
 
 
@@ -29,6 +30,8 @@ class Move implements Action {
         (cube4.x + moveDistance >= 0 && cube4.x + moveDistance < Viewport.CANVAS_WIDTH - 15)
       );
     } else if (axis === 'y') {
+
+
       return (
         (cube1.y + moveDistance >= 0 && cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
         (cube2.y + moveDistance >= 0 && cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 17) &&
@@ -47,16 +50,27 @@ class Move implements Action {
       y: axis === 'y' ? cube.y + moveDistance : cube.y
     };
   };
-      
 
-  static moveBlock = (s: State, moveDistance: number, axis: string) => (
-    Move.isBlockInsideScreen(s, moveDistance, axis) ? {
-      cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
-      cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
-      cube3: Move.moveCube(s, s.currentBlock.cube3, moveDistance, axis),
-      cube4: Move.moveCube(s, s.currentBlock.cube4, moveDistance, axis),
-      } : s.currentBlock
-  );
+
+  static moveBlock = (s: State, moveDistance: number, axis: string): Tetrominos => {
+    if (Move.isBlockInsideScreen(s, moveDistance, axis)) {
+      return {
+        cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
+        cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
+        cube3: Move.moveCube(s, s.currentBlock.cube3, moveDistance, axis),
+        cube4: Move.moveCube(s, s.currentBlock.cube4, moveDistance, axis),
+      };
+    } 
+    else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') {
+      // generate new block when we reach the bottom of the game
+      const newBlock = generateNewBlock(s);
+      return newBlock;
+    } 
+    else {
+      return s.currentBlock;
+    }
+  };
+    
 
   apply = (s: State) => {
     const updatedBlock = {
