@@ -84,22 +84,9 @@ class Move implements Action {
     }
 
   }
-  
-
-        
-    
-
-  // apply = (s: State) => {
-  //   const updatedBlock = {
-  //     ...s,
-  //     currentBlock: Move.moveBlock(s, this.moveDistance, this.axis)
-  //     };
-
-  //   return updatedBlock;
-  // };
 
   apply = (s: State) => {
-    return Move.moveBlock(s, this.moveDistance, this.axis)
+    return Tick.detectCollisions(Move.moveBlock(s, this.moveDistance, this.axis));
   };
 };
 
@@ -114,6 +101,32 @@ class Rotate implements Action {
 
 
 class Tick implements Action {
+  static isblockCollided = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
+    return Object.values(blockA).some(cubeA =>
+      Object.values(blockB).some(cubeB =>
+        cubeA.x === cubeB.x  && cubeA.y + Block.HEIGHT === cubeB.y
+      )
+    );
+  };
+
+  static detectCollisions = (s: State): State => {
+    //check the current block collision vs others
+    const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
+      Tick.isblockCollided(s.currentBlock, existingBlock)
+    );
+
+
+    const updatedCurrentBlock = collidesWithOtherBlocks ? generateNewBlock(s) : s.currentBlock;
+    const updatedAllBlocks = collidesWithOtherBlocks
+      ? (s.allBlocks || []).concat(s.currentBlock)
+      : s.allBlocks;
+  
+    return {
+      ...s,
+      currentBlock: updatedCurrentBlock,
+      allBlocks: updatedAllBlocks
+    };
+  }
 
   static moveTetroDown = (s: State): State => {
     if (Move.isBlockInsideScreen(s, 5, "y")) {
@@ -141,7 +154,7 @@ class Tick implements Action {
     }
   };
     
-  // static handleCollisions = (s: State): State => s; //TODO
+  
 
   /**
    * Updates the state by proceeding with one time step.
@@ -150,7 +163,7 @@ class Tick implements Action {
    * @returns Updated state
      */
   apply = (s: State) => {
-    return Tick.moveTetroDown(s);
+    return Tick.detectCollisions(Tick.moveTetroDown(s));
   };
 }
 
