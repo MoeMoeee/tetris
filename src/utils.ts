@@ -1,6 +1,6 @@
 import { Block, State, Tetrominos, Viewport } from "./types";
 
-export {hide, show, createSvgElement, createTetro, generateNewBlock}
+export {hide, show, createSvgElement, createTetro}
 
 
 
@@ -54,15 +54,6 @@ const createSvgElement = (
   return elem;
 };
 
-
-const generateNewBlock = (s: State) => {
-  return {
-    cube1: {x: 0, y: 0},
-    cube2: {x: Block.WIDTH, y: 0}, 
-    cube3: {x: 0, y: Block.HEIGHT},
-    cube4: {x: Block.WIDTH, y: Block.HEIGHT}
-  };
-}
 
 
 // const blockIsInRow = (block: Tetrominos, row: number): boolean => {

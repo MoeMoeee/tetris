@@ -1,5 +1,5 @@
 import { Action, Block, State, Tetrominos, Viewport } from "./types";
-import { createTetro, generateNewBlock } from "./utils";
+import { createTetro } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
 
@@ -119,19 +119,19 @@ class Move implements Action {
 };
 
 class Tick implements Action {
-  static isblockCollided = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
-    
+  static isBlockCollided = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
+    const isCollision = (cubeA: { x: number; y: number }) => (cubeB: { x: number; y: number }) =>
+      cubeA.x === cubeB.x && cubeA.y + Block.HEIGHT === cubeB.y;
+  
     return Object.values(blockA).some(cubeA =>
-      Object.values(blockB).some(cubeB =>
-        cubeA.x === cubeB.x  && cubeA.y + Block.HEIGHT === cubeB.y
-      )
+      Object.values(blockB).some(isCollision(cubeA))
     );
   };
 
   static detectCollisions = (s: State): State => {
     //check the current block collision vs others
     const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
-      Tick.isblockCollided(s.currentBlock, existingBlock)
+      Tick.isBlockCollided(s.currentBlock, existingBlock)
     );
 
 
@@ -163,9 +163,7 @@ class Tick implements Action {
 
     else {
       const currentBlock = s.currentBlock;
-      console.log(currentBlock);
-
-      const newBlock = generateNewBlock(s); 
+      const newBlock = createTetro(); 
 
       return {
         ...s,
