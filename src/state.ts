@@ -30,16 +30,16 @@ class Move implements Action {
         )
       );
     }
-    // } else if (axis === 'x') {
-    //   return Object.values(s.currentBlock).some(currCube =>
-    //     s.allBlocks?.some(block =>
-    //       Object.values(block).some(prevCube =>
-    //         currCube.y === prevCube.y &&
-    //         currCube.x + moveDistance === prevCube.x
-    //       )
-    //     )
-    //   );
-    // }
+    else if (axis === 'x') {
+      return Object.values(s.currentBlock).some(currCube =>
+        s.allBlocks?.some(block =>
+          Object.values(block).some(prevCube =>
+            currCube.y + Block.HEIGHT >= prevCube.y &&
+            currCube.x + moveDistance >= prevCube.x
+          )
+        )
+      );
+    }
   
     return false;
   };
@@ -114,7 +114,7 @@ class Move implements Action {
   }
 
   apply = (s: State) => {
-    return Tick.detectCollisions(Move.moveBlock(s, this.moveDistance, this.axis));
+    return Move.moveBlock(s, this.moveDistance, this.axis);
   };
 };
 
