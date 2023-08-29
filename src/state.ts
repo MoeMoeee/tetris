@@ -94,7 +94,7 @@ class Move implements Action {
 
     else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') {
       const currentBlock = s.currentBlock;      
-      const newBlock = generateNewBlock(s);
+      const newBlock = createTetro();
 
       return {
         ...s,
@@ -135,7 +135,7 @@ class Tick implements Action {
     );
 
 
-    const updatedCurrentBlock = collidesWithOtherBlocks ? generateNewBlock(s) : s.currentBlock;
+    const updatedCurrentBlock = collidesWithOtherBlocks ? createTetro() : s.currentBlock;
     const updatedAllBlocks = collidesWithOtherBlocks
       ? (s.allBlocks || []).concat(s.currentBlock)
       : s.allBlocks;
