@@ -79,39 +79,36 @@ class Move implements Action {
   };
 
   static moveBlock = (s: State, moveDistance: number, axis: string): State => {
-    if (Move.isBlockInsideScreen(s, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis) ){ 
-      const newBlock = {
-        cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
-        cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
-        cube3: Move.moveCube(s, s.currentBlock.cube3, moveDistance, axis),
-        cube4: Move.moveCube(s, s.currentBlock.cube4, moveDistance, axis),
-      };
-      return {
-        ...s,
-        currentBlock: newBlock  
-      };
-    } 
-
-    else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') {
-      const currentBlock = s.currentBlock;      
-      const newBlock = createTetro();
-
-      return {
-        ...s,
-        allBlocks: s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, currentBlock],
-        currentBlock: newBlock  
-      };
-    }
-    
-    else {
-      const newBlock = s.currentBlock; 
-      return {
-        ...s,
-        currentBlock: newBlock  
-      };
-    }
-
-  }
+    const shouldMoveBlock = () => 
+      Move.isBlockInsideScreen(s, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis);
+  
+    const moveCubes = (block: Tetrominos) => ({
+      cube1: Move.moveCube(s, block.cube1, moveDistance, axis),
+      cube2: Move.moveCube(s, block.cube2, moveDistance, axis),
+      cube3: Move.moveCube(s, block.cube3, moveDistance, axis),
+      cube4: Move.moveCube(s, block.cube4, moveDistance, axis),
+    });
+  
+    const moveOrnewBlock = () => {
+      if (shouldMoveBlock()) {
+        return { ...s, currentBlock: moveCubes(s.currentBlock) };
+      } 
+      
+      else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') 
+      {
+        const newBlock = createTetro();
+        const allBlocks = s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, s.currentBlock];
+        return { ...s, allBlocks, currentBlock: newBlock };
+      } 
+      
+      else {
+        return s;
+      }
+    };
+  
+    return moveOrnewBlock();
+  };
+  
 
   apply = (s: State) => {
     return Move.moveBlock(s, this.moveDistance, this.axis);
@@ -189,7 +186,6 @@ class Tick implements Action {
 
 
 class Rotate implements Action {
-
   // TODO
   apply = (s: State) => {
     return s;
