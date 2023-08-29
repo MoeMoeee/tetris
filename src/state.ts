@@ -19,6 +19,34 @@ allBlocks: null,
 class Move implements Action {
   constructor(public readonly moveDistance: number, public readonly axis: string) { } 
 
+  static iscollideWhenMove = (s: State, moveDistance: number, axis: string): boolean => {
+    if (axis === 'y') {
+      return Object.values(s.currentBlock).some(currCube =>
+        s.allBlocks?.some(block =>
+          Object.values(block).some(prevCube =>
+            currCube.x + moveDistance >= prevCube.x &&
+            currCube.y + moveDistance + Block.HEIGHT >= prevCube.y
+          )
+        )
+      );
+    }
+    // } else if (axis === 'x') {
+    //   return Object.values(s.currentBlock).some(currCube =>
+    //     s.allBlocks?.some(block =>
+    //       Object.values(block).some(prevCube =>
+    //         currCube.y === prevCube.y &&
+    //         currCube.x + moveDistance === prevCube.x
+    //       )
+    //     )
+    //   );
+    // }
+  
+    return false;
+  };
+  
+
+
+
   static isBlockInsideScreen = (s: State, moveDistance: number, axis: string): boolean => {
     const { cube1, cube2, cube3, cube4 } = s.currentBlock;
   
@@ -51,7 +79,7 @@ class Move implements Action {
   };
 
   static moveBlock = (s: State, moveDistance: number, axis: string): State => {
-    if (Move.isBlockInsideScreen(s, moveDistance+4, axis)) {
+    if (Move.isBlockInsideScreen(s, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis) ){ 
       const newBlock = {
         cube1: Move.moveCube(s, s.currentBlock.cube1, moveDistance, axis),
         cube2: Move.moveCube(s, s.currentBlock.cube2, moveDistance, axis),
@@ -65,8 +93,8 @@ class Move implements Action {
     } 
 
     else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') {
-      const currentBlock = s.currentBlock;
-      const newBlock = generateNewBlock(s); 
+      const currentBlock = s.currentBlock;      
+      const newBlock = generateNewBlock(s);
 
       return {
         ...s,
@@ -90,18 +118,9 @@ class Move implements Action {
   };
 };
 
-class Rotate implements Action {
-
-  // TODO
-  apply = (s: State) => {
-    return s;
-  };
-};
-
-
-
 class Tick implements Action {
   static isblockCollided = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
+    
     return Object.values(blockA).some(cubeA =>
       Object.values(blockB).some(cubeB =>
         cubeA.x === cubeB.x  && cubeA.y + Block.HEIGHT === cubeB.y
@@ -144,6 +163,8 @@ class Tick implements Action {
 
     else {
       const currentBlock = s.currentBlock;
+      console.log(currentBlock);
+
       const newBlock = generateNewBlock(s); 
 
       return {
@@ -168,4 +189,14 @@ class Tick implements Action {
 }
 
 
+
+class Rotate implements Action {
+
+  // TODO
+  apply = (s: State) => {
+    return s;
+  };
+};
+
 const reduceState = (s: State, action: Action) => action.apply(s);
+

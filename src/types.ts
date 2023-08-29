@@ -11,14 +11,14 @@ const Viewport = {
 } as const;
   
 const Constants = {
-TICK_RATE_MS: 500,
-GRID_WIDTH: 10,
-GRID_HEIGHT: 20,
+    TICK_RATE_MS: 500,
+    GRID_WIDTH: 10,
+    GRID_HEIGHT: 20,
 } as const;
 
 const Block = {
-WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
-HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
+    WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
+    HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
 };
   
   
@@ -35,18 +35,18 @@ type Event = "keydown" | "keyup" | "keypress";
 
 // consist of 4 cubes
 type Tetrominos = Readonly<{
-cube1: { x: number; y: number };
-cube2: { x: number; y: number };
-cube3: { x: number; y: number };
-cube4: { x: number; y: number };
+    cube1: { x: number; y: number };
+    cube2: { x: number; y: number };
+    cube3: { x: number; y: number };
+    cube4: { x: number; y: number };
 }>
 
 type State = Readonly<{
-currentBlock: Tetrominos,
-gameEnd: boolean,
-score: number,
-highScore: number,
-allBlocks: Array<Tetrominos> | null
+    currentBlock: Tetrominos,
+    gameEnd: boolean,
+    score: number,
+    highScore: number,
+    allBlocks: Array<Tetrominos> | null
 }>;
   
 /**
