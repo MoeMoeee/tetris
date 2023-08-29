@@ -24,7 +24,7 @@ class Move implements Action {
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
           Object.values(block).some(prevCube =>
-            currCube.x + moveDistance >= prevCube.x &&
+            currCube.x === prevCube.x &&
             currCube.y + moveDistance + Block.HEIGHT >= prevCube.y
           )
         )
@@ -34,8 +34,8 @@ class Move implements Action {
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
           Object.values(block).some(prevCube =>
-            currCube.y + Block.HEIGHT >= prevCube.y &&
-            currCube.x + moveDistance >= prevCube.x
+            currCube.x + moveDistance === prevCube.x 
+            && currCube.y + 2*Block.HEIGHT >= prevCube.y 
           )
         )
       );
