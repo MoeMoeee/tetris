@@ -1,7 +1,7 @@
 import { Action, Block, Position, State, Tetrominos, Viewport } from "./types";
-import { createTetro, isEndGame } from "./utils";
+import { clearRow, createTetro, isEndGame } from "./utils";
 
-export { initialState, reduceState, Rotate, Tick, Move, isEndGame }
+export { initialState, reduceState, Rotate, Tick, Move }
 
 
 
@@ -179,7 +179,7 @@ class Tick implements Action {
    * @returns Updated state
      */
   apply = (s: State) => {
-    return Tick.detectCollisions(isEndGame((Tick.moveTetroDown(s))));
+    return clearRow(Tick.detectCollisions(isEndGame((Tick.moveTetroDown(s)))));
   };
 }
 

@@ -1,7 +1,7 @@
 
-import { Block, Position, State, Tetrominos, Viewport } from "./types";
+import { Block, Constants, Position, State, Tetrominos, Viewport } from "./types";
 
-export {hide, createSvgElement, createTetro, isEndGame}
+export {hide, createSvgElement, createTetro, isEndGame, clearRow}
 
 import { main } from "./main";
 
@@ -9,28 +9,6 @@ import { main } from "./main";
 const createTetro = () => {
   return Position.SPAWN_POS;
 }
-
-  // const newTetro = {
-  //   cube1: {x: 100, y: 0},
-  //   cube2: {x: 100 - Block.WIDTH, y: 0}, 
-  //   cube3: {x: 100, y: Block.HEIGHT},
-  //   cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT}
-  // };
-
-  // checkEndGame(s, newTetro)? newTetro : newTetro;
-    
-
-// const checkEndGame = (s: State, currBlock: Tetrominos) : State => {
-//   const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
-//     Tick.isBlockCollided(currBlock, existingBlock)
-//   );
-  
-//   const endGameState = {...s, gameEnd: true};
-
-//   collidesWithOtherBlocks?  endGameState :  s;
-// }
-
-
 
   
 /**
@@ -83,17 +61,49 @@ const isEndGame = (s: State): State => {
   return (collidesWithOtherBlocks) ? endGameState : currState;
 };
 
-// const blockIsInRow = (block: Tetrominos, row: number): boolean => {
-//   return (
-//     block.cube1.y === row * Block.HEIGHT &&
-//     block.cube2.y === row * Block.HEIGHT &&
-//     block.cube3.y === row * Block.HEIGHT &&
-//     block.cube4.y === row * Block.HEIGHT
-//   );
-// };
+
+function clearRow(state: State): State {
+  const { allBlocks} = state;
+
+  if (!allBlocks) {
+      return state;
+  }
+
+  const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
+
+  state.allBlocks?.forEach((block) => {
+      Object.values(block).forEach((cube) => {
+          if (cube.y >= 0) {
+              rowOccupancy[cube.y] += 1;
+          }
+      });
+  });
 
 
-// const clearRow = (s: State) => {
+
+  const newAllBlocks = state.allBlocks?.map((block) => {
+      const cubes = Object.keys(block).map((cubeKey) => block[cubeKey]);
+      const cubesBelowClearedRows = cubes.filter((cube) => cube.y >= 0 && cube.y < rowOccupancy.length && rowOccupancy[cube.y] !== Constants.GRID_WIDTH);
+
+      return cubesBelowClearedRows.reduce((newBlock, cube) => {
+          return {
+              ...newBlock,
+              [cubeKey]: { x: cube.x, y: cube.y + rowOccupancy.slice(cube.y + 1).filter((count) => count === Constants.GRID_WIDTH).length },
+          };
+      }, block);
+  });
+
+  const newState = {
+      ...state,
+      allBlocks: newAllBlocks,
+      score: state.score + newAllBlocks.length * 1000, // Update score based on number of cleared rows
+  };
+
+  return newState;
+}
 
 
-// }
+
+
+
+
