@@ -1,5 +1,5 @@
 import { Action, Block, Position, State, Tetrominos, Viewport } from "./types";
-import { createTetro } from "./utils";
+import { createTetro, isEndGame } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move, isEndGame }
 
@@ -179,7 +179,7 @@ class Tick implements Action {
    * @returns Updated state
      */
   apply = (s: State) => {
-    return isEndGame(Tick.detectCollisions(Tick.moveTetroDown(s)));
+    return Tick.detectCollisions(isEndGame((Tick.moveTetroDown(s))));
   };
 }
 
@@ -194,41 +194,6 @@ class Rotate implements Action {
 
 const reduceState = (s: State, action: Action) => action.apply(s);
 
-// const isEndGame = (s: State) : State => {
-//   const currState = s;
-//   const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
-//     Tick.isBlockCollided(s.currentBlock, existingBlock)
-//   );
-//   console.log(collidesWithOtherBlocks);
-  
-//   const endGameState = {...s, gameEnd: true};
 
-//   return collidesWithOtherBlocks? endGameState : currState;
 
-// }
-
-const isCubePositionEqual = (cube: { x: number; y: number }, spawnPos: { x: number; y: number }) => {
-  return cube.x === spawnPos.x && cube.y === spawnPos.y;
-};
-
-const isEndGame = (s: State): State => {
-  const currentBlock = s.currentBlock;
-  const spawnPos = Position.SPAWN_POS;
-  const currState = s;
-  const endGameState = {...s, gameEnd: true};
-
-  
-  const isBlockInSpawn = 
-    isCubePositionEqual(currentBlock.cube1, spawnPos.cube1) &&
-    isCubePositionEqual(currentBlock.cube2, spawnPos.cube2) &&
-    isCubePositionEqual(currentBlock.cube3, spawnPos.cube3) &&
-    isCubePositionEqual(currentBlock.cube4, spawnPos.cube4);
-
-  if (isBlockInSpawn) {
-    console.log('end');
-
-  }
-  return isBlockInSpawn ? {...s, gameEnd: true} : currState;
-
-};
 

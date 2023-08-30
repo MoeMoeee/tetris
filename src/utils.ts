@@ -1,7 +1,7 @@
 
 import { Block, Position, State, Tetrominos, Viewport } from "./types";
 
-export {hide, createSvgElement, createTetro}
+export {hide, createSvgElement, createTetro, isEndGame}
 
 import { main } from "./main";
 
@@ -61,7 +61,27 @@ const createSvgElement = (
   return elem;
 };
 
+const blockMatchedCurrent = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
+  const isCollision = (cubeA: { x: number; y: number }) => (cubeB: { x: number; y: number }) =>
+    cubeA.x === cubeB.x && cubeA.y === cubeB.y;
 
+  return Object.values(blockA).some(cubeA =>
+    Object.values(blockB).some(isCollision(cubeA))
+  );
+};
+
+const isEndGame = (s: State): State => {
+  const currentBlock = s.currentBlock;
+  const spawnPos = Position.SPAWN_POS;
+  const currState = s;
+  const endGameState = {...s, gameEnd: true};
+
+  const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
+    blockMatchedCurrent(s.currentBlock, existingBlock)
+  );
+
+  return (collidesWithOtherBlocks) ? endGameState : currState;
+};
 
 // const blockIsInRow = (block: Tetrominos, row: number): boolean => {
 //   return (
