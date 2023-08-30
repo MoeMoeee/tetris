@@ -3,7 +3,6 @@ import { Block, Constants, Position, State, Tetrominos, Viewport } from "./types
 
 export {hide, createSvgElement, createTetro, isEndGame, clearRow}
 
-import { main } from "./main";
 
 // tetro spawn position
 const createTetro = () => {
@@ -49,8 +48,6 @@ const blockMatchedCurrent = (blockA: Tetrominos, blockB: Tetrominos): boolean =>
 };
 
 const isEndGame = (s: State): State => {
-  const currentBlock = s.currentBlock;
-  const spawnPos = Position.SPAWN_POS;
   const currState = s;
   const endGameState = {...s, gameEnd: true};
 
@@ -61,49 +58,58 @@ const isEndGame = (s: State): State => {
   return (collidesWithOtherBlocks) ? endGameState : currState;
 };
 
-
-function clearRow(state: State): State {
-  const { allBlocks} = state;
+// To know which row we need to remove, we need to check how many cubes 
+// are in an y-axis across all CANVAS_HEIGHT
+// After clear the row, we also need to drop down the stacked blocks 
+// and increment the score 
+function clearRow(s: State): State {
+  const { allBlocks } = s;
 
   if (!allBlocks) {
-      return state;
+      return s;
   }
 
+  // a array of keys: y_coordinates 
+  //            values: total cubes occupied 
   const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
 
-  state.allBlocks?.forEach((block) => {
+  const newRowOccupancy = rowOccupancy.map(value => value); // Create a copy of rowOccupancy
+
+  s.allBlocks?.forEach((block) => {
       Object.values(block).forEach((cube) => {
           if (cube.y >= 0) {
-              rowOccupancy[cube.y] += 1;
+              newRowOccupancy[cube.y] += 1; // Update the copied array
           }
       });
   });
+  
+  
 
+  const newState = newRowOccupancy.reduce((currentState, rowCount) => {
+    if (rowCount === Constants.GRID_WIDTH) {
+      // filter out the blocks we about to remove
+      const newAllBlocks = currentState.allBlocks?.filter((block: Tetrominos) =>
+        !Object.values(block).some(
+          (cube) => cube.y >= 0 && newRowOccupancy[cube.y] === Constants.GRID_WIDTH
+        )
+      );
+        
+      if (newAllBlocks) {
+        return {
+          ...currentState,
+          allBlocks: newAllBlocks, // update new 
+          score: currentState.score + (allBlocks.length - newAllBlocks.length)*100, 
+          //update score when we cleared a row
+        };
+      }
+    }
+    
+    return currentState;
+  }, s);
 
-
-  const newAllBlocks = state.allBlocks?.map((block) => {
-      const cubes = Object.keys(block).map((cubeKey) => block[cubeKey]);
-      const cubesBelowClearedRows = cubes.filter((cube) => cube.y >= 0 && cube.y < rowOccupancy.length && rowOccupancy[cube.y] !== Constants.GRID_WIDTH);
-
-      return cubesBelowClearedRows.reduce((newBlock, cube) => {
-          return {
-              ...newBlock,
-              [cubeKey]: { x: cube.x, y: cube.y + rowOccupancy.slice(cube.y + 1).filter((count) => count === Constants.GRID_WIDTH).length },
-          };
-      }, block);
-  });
-
-  const newState = {
-      ...state,
-      allBlocks: newAllBlocks,
-      score: state.score + newAllBlocks.length * 1000, // Update score based on number of cleared rows
-  };
 
   return newState;
+
 }
-
-
-
-
 
 

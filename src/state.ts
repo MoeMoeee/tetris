@@ -131,7 +131,6 @@ class Tick implements Action {
       Tick.isBlockCollided(s.currentBlock, existingBlock)
     );
 
-
     const updatedCurrentBlock = collidesWithOtherBlocks ? createTetro() : s.currentBlock;
     const updatedAllBlocks = collidesWithOtherBlocks
       ? (s.allBlocks || []).concat(s.currentBlock)
