@@ -40,6 +40,11 @@ type Event = "keydown" | "keyup" | "keypress";
 /** Utility functions */
 
 /** State processing */
+type Cube = {
+    x: number,
+    y: number,
+    shape: "I" | "J" | "L" | "O" | "S" | "T" | "Z"
+}
 
 // consist of 4 cubes
 type Tetrominos = Readonly<{

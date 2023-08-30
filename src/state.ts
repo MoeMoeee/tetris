@@ -45,8 +45,6 @@ class Move implements Action {
   };
   
 
-
-
   static isBlockInsideScreen = (s: State, moveDistance: number, axis: string): boolean => {
     const { cube1, cube2, cube3, cube4 } = s.currentBlock;
   
@@ -116,12 +114,12 @@ class Move implements Action {
 };
 
 class Tick implements Action {
-  static isBlockCollided = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
+  static isBlockCollided = (currBlock: Tetrominos, allBlock: Tetrominos): boolean => {
     const isCollision = (cubeA: { x: number; y: number }) => (cubeB: { x: number; y: number }) =>
       cubeA.x === cubeB.x && cubeA.y + Block.HEIGHT === cubeB.y;
   
-    return Object.values(blockA).some(cubeA =>
-      Object.values(blockB).some(isCollision(cubeA))
+    return Object.values(currBlock).some(currBlock =>
+      Object.values(allBlock).some(isCollision(currBlock))
     );
   };
 
