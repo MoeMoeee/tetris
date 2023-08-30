@@ -1,30 +1,37 @@
-import { Block, State, Tetrominos, Viewport } from "./types";
 
-export {hide, show, createSvgElement, createTetro}
+import { Block, Position, State, Tetrominos, Viewport } from "./types";
 
+export {hide, createSvgElement, createTetro}
 
+import { main } from "./main";
 
 // tetro spawn position
 const createTetro = () => {
-    return {
-      cube1: {x: 100, y: 0},
-      cube2: {x: 100 - Block.WIDTH, y: 0}, 
-      cube3: {x: 100, y: Block.HEIGHT},
-      cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT}
-    };
+  return Position.SPAWN_POS;
 }
 
+  // const newTetro = {
+  //   cube1: {x: 100, y: 0},
+  //   cube2: {x: 100 - Block.WIDTH, y: 0}, 
+  //   cube3: {x: 100, y: Block.HEIGHT},
+  //   cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT}
+  // };
 
-/** Rendering (side effects) */
+  // checkEndGame(s, newTetro)? newTetro : newTetro;
+    
 
-/**
- * Displays a SVG element on the canvas. Brings to foreground.
- * @param elem SVG element to display
- */
-const show = (elem: SVGGraphicsElement) => {
-  elem.setAttribute("visibility", "visible");
-  elem.parentNode!.appendChild(elem);
-};
+// const checkEndGame = (s: State, currBlock: Tetrominos) : State => {
+//   const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
+//     Tick.isBlockCollided(currBlock, existingBlock)
+//   );
+  
+//   const endGameState = {...s, gameEnd: true};
+
+//   collidesWithOtherBlocks?  endGameState :  s;
+// }
+
+
+
   
 /**
  * Hides a SVG element on the canvas.

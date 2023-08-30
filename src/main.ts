@@ -16,7 +16,7 @@ import "./style.css";
 
 import { Observable, concat, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
-import {hide, show, createSvgElement} from "./utils";
+import {hide, createSvgElement} from "./utils";
 import { Key, Event, Tetrominos, State, Block, Viewport, Constants, Action } from './types'
 import { initialState, reduceState, Rotate, Tick, Move } from './state';
 
@@ -71,7 +71,19 @@ export function main() {
 
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
+  
+/** Rendering (side effects) */
+/**
+ * Displays a SVG element on the canvas. Brings to foreground.
+ * @param elem SVG element to display
+ */
+  const show = (elem: SVGGraphicsElement) => {
+  elem.setAttribute("visibility", "visible");
 
+  if (!elem.parentNode) {
+    svg.appendChild(elem);
+  }
+};
   /**
    * Renders the current state to the canvas.
    *
@@ -130,10 +142,13 @@ export function main() {
   const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
   const subscription = 
   state$.subscribe((s: State) => {
-    render(s);
     if (s.gameEnd) {
+      subscription.unsubscribe();
       show(gameover);
+
     } else {
+      render(s);
+
       hide(gameover);
     }
   });

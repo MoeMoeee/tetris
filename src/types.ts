@@ -1,4 +1,4 @@
-export {Viewport, Constants, Block} 
+export {Viewport, Constants, Block, Position} 
 export type { Key, Event, Tetrominos, State, Action}
 
 /** Constants */
@@ -19,7 +19,15 @@ const Constants = {
 const Block = {
     WIDTH: Viewport.CANVAS_WIDTH / Constants.GRID_WIDTH,
     HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
-};
+}
+
+const Position = {
+    SPAWN_POS: {cube1: {x: 100, y: 0},
+                cube2: {x: 100 - Block.WIDTH, y: 0}, 
+                cube3: {x: 100, y: Block.HEIGHT},
+                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT}
+                }
+} as const;
   
   
   
