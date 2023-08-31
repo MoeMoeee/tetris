@@ -1,4 +1,4 @@
-export {Viewport, Constants, Block, Position} 
+export {Viewport, Constants, Block, Position, CubeColor} 
 export type { Key, Event, Tetrominos, State, Action, Cube}
 
 /** Constants */
@@ -21,13 +21,7 @@ const Block = {
     HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
 }
 
-const Position = {
-    SPAWN_POS: {cube1: {x: 100, y: 0, shape: "S"},
-                cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S"}, 
-                cube3: {x: 100, y: Block.HEIGHT, shape: "S"},
-                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S"}
-                }
-} as const;
+
   
   
   
@@ -40,11 +34,21 @@ type Event = "keydown" | "keyup" | "keypress";
 /** Utility functions */
 
 /** State processing */
+
+enum CubeColor {
+    Red = "red",
+    Blue = "blue",
+    Green = "green",
+    Yellow = "yellow",
+}
+
 type Cube = {
     x: number,
     y: number,
-    shape: "I" | "J" | "L" | "O" | "S" | "T" | "Z"
-}
+    shape: "I" | "J" | "L" | "O" | "S" | "T" | "Z",
+    color: CubeColor,
+};
+
 
 // consist of 4 cubes
 type Tetrominos = Readonly<{
@@ -62,6 +66,13 @@ type State = Readonly<{
     allBlocks: Array<Tetrominos> | null
 }>;
   
+const Position = {
+    SPAWN_POS: {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Green},
+                cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S", color: CubeColor.Green}, 
+                cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Green},
+                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Green}
+                }
+} as const;
 /**
  * Actions modify state
  */
