@@ -1,4 +1,4 @@
-import { Action, Block, Position, State, Tetrominos, Viewport } from "./types";
+import { Action, Block, Cube, Position, State, Tetrominos, Viewport } from "./types";
 import { clearRow, createTetro, isEndGame } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
@@ -31,11 +31,13 @@ class Move implements Action {
       );
     }
     else if (axis === 'x') {
+      
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
           Object.values(block).some(prevCube =>
-            currCube.x + moveDistance === prevCube.x 
-            && currCube.y + 2*Block.HEIGHT >= prevCube.y 
+            currCube.x + moveDistance === prevCube.x && 
+            currCube.y + Block.HEIGHT >= prevCube.y && 
+            currCube.y - Block.HEIGHT <= prevCube.y
           )
         )
       );
@@ -69,8 +71,9 @@ class Move implements Action {
   };
       
 
-  static moveCube = (s: State, cube: { x: number; y: number }, moveDistance: number, axis: string) => {
+  static moveCube = (s: State, cube: Cube, moveDistance: number, axis: string) => {
     return {
+      ...cube,
       x: axis === 'x' ? cube.x + moveDistance : cube.x,
       y: axis === 'y' ? cube.y + moveDistance : cube.y
     };

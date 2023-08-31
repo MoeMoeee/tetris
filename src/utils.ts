@@ -1,5 +1,5 @@
 
-import { Block, Constants, Position, State, Tetrominos, Viewport } from "./types";
+import { Block, Constants, Cube, Position, State, Tetrominos, Viewport } from "./types";
 
 export {hide, createSvgElement, createTetro, isEndGame, clearRow}
 
@@ -39,7 +39,7 @@ const createSvgElement = (
 };
 
 const blockMatchedCurrent = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
-  const isCollision = (cubeA: { x: number; y: number }) => (cubeB: { x: number; y: number }) =>
+  const isCollision = (cubeA: Cube) => (cubeB: Cube) =>
     cubeA.x === cubeB.x && cubeA.y === cubeB.y;
 
   return Object.values(blockA).some(cubeA =>
@@ -69,8 +69,8 @@ function clearRow(s: State): State {
       return s;
   }
 
-  // a array of keys: y_coordinates 
-  //            values: total cubes occupied 
+  // a array of size height of the screen 
+  // and store value of total cubes occupied 
   const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
 
   const newRowOccupancy = rowOccupancy.map(value => value); // Create a copy of rowOccupancy

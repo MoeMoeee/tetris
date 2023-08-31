@@ -1,5 +1,5 @@
 export {Viewport, Constants, Block, Position} 
-export type { Key, Event, Tetrominos, State, Action}
+export type { Key, Event, Tetrominos, State, Action, Cube}
 
 /** Constants */
 
@@ -22,10 +22,10 @@ const Block = {
 }
 
 const Position = {
-    SPAWN_POS: {cube1: {x: 100, y: 0},
-                cube2: {x: 100 - Block.WIDTH, y: 0}, 
-                cube3: {x: 100, y: Block.HEIGHT},
-                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT}
+    SPAWN_POS: {cube1: {x: 100, y: 0, shape: "S"},
+                cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S"}, 
+                cube3: {x: 100, y: Block.HEIGHT, shape: "S"},
+                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S"}
                 }
 } as const;
   
@@ -48,10 +48,10 @@ type Cube = {
 
 // consist of 4 cubes
 type Tetrominos = Readonly<{
-    cube1: { x: number; y: number };
-    cube2: { x: number; y: number };
-    cube3: { x: number; y: number };
-    cube4: { x: number; y: number };
+    cube1: Cube;
+    cube2: Cube;
+    cube3: Cube;
+    cube4: Cube;
 }>
 
 type State = Readonly<{
