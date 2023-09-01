@@ -1,14 +1,52 @@
 
+import { Observable, map } from "rxjs";
 import { Move, Tick } from "./state";
 import { Block, Constants, Cube, BlockType, State, Tetrominos, Viewport } from "./types";
 
 export {hide, createSvgElement, createTetro, isEndGame}
 
 // tetro spawn position
-const createTetro = () => {
-  return BlockType.I;
-}
 
+const createTetro = (random: number) => {
+  const scaleRandom = RNG.scale(RNG.hash(random));
+  
+  console.log(scaleRandom);
+  
+  if (scaleRandom >= -1 && scaleRandom < -0.9) {
+    return BlockType.I;
+  } else if (scaleRandom >= -0.9 && scaleRandom < -0.8) {
+    return BlockType.O;
+  } else if (scaleRandom >= -0.8 && scaleRandom < -0.7) {
+    return BlockType.T;
+  } else if (scaleRandom >= -0.7 && scaleRandom < -0.6) {
+    return BlockType.J;
+  } else if (scaleRandom >= -0.6 && scaleRandom < -0.5) {
+    return BlockType.L;
+  } else if (scaleRandom >= -0.5 && scaleRandom < -0.4) {
+    return BlockType.S;
+  } else if (scaleRandom >= -0.4 && scaleRandom < -0.3) {
+    return BlockType.Z;
+  } else {
+    return BlockType.O; 
+  }
+};
+
+  
+
+export function createRngStreamFromSource<T>(source$: Observable<T>) {
+  return function createRngStream(
+    seed: number 
+  ): Observable<number> {
+    const randomNumberStream = source$.pipe(
+      map(() => {
+        seed = RNG.hash(seed); 
+        return RNG.scale(seed);
+      })
+    );
+    
+    return randomNumberStream;
+  };
+}
 
 // Code for creating random stream from Applied Class 
 export abstract class RNG {

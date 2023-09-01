@@ -16,9 +16,9 @@ import "./style.css";
 
 import { Observable, concat, fromEvent, interval, merge } from "rxjs";
 import { map, filter, scan, takeWhile } from "rxjs/operators";
-import {hide, createSvgElement} from "./utils";
+import {hide, createSvgElement, createRngStreamFromSource} from "./utils";
 import { Key, Event, Tetrominos, State, Block, Viewport, Constants, Action } from './types'
-import { initialState, reduceState, Rotate, Tick, Move } from './state';
+import { initialState, reduceState, Rotate, Tick, Move, GenerateBlock } from './state';
 
 
 /**
@@ -66,12 +66,11 @@ export function main() {
   const moveRight$ = right$.pipe(map(_ => new Move(Block.WIDTH, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
     
-  
-
 
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
-  
+  const rngStream$ = createRngStreamFromSource(interval(50))(Constants.SEED);
+
 /** Rendering (side effects) */
 /**
  * Displays a SVG element on the canvas. Brings to foreground.
@@ -138,7 +137,10 @@ export function main() {
   };
 
   const gameClock$ = tick$.pipe(scan(() => new Tick(), initialState));
-  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$);
+  const gameRand$ = rngStream$.pipe(
+    map(randomValue => new GenerateBlock(randomValue)),
+  );
+  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$, gameRand$);
   const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
   const subscription = 
   state$.subscribe((s: State) => {

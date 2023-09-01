@@ -1,7 +1,7 @@
 import { Action, Block, Constants, Cube, State, Tetrominos, Viewport } from "./types";
 import {  createTetro, isEndGame } from "./utils";
 
-export { initialState, reduceState, Rotate, Tick, Move }
+export { initialState, reduceState, Rotate, Tick, Move, GenerateBlock}
 
 
 
@@ -9,10 +9,11 @@ export { initialState, reduceState, Rotate, Tick, Move }
 // Define the initial state using the State type
 const initialState: State = {
 gameEnd: false,
-currentBlock: createTetro(),
+currentBlock: createTetro(0),
 score: 0,
 highScore: 0,
 allBlocks: null,
+nextBlock: createTetro(1),
 } as const;
 
 
@@ -97,7 +98,7 @@ class Move implements Action {
       
       else if (!Move.isBlockInsideScreen(s.currentBlock, moveDistance, axis) && axis === 'y') 
       {
-        const newBlock = createTetro();
+        const newBlock = s.nextBlock;
         const allBlocks = s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, s.currentBlock];
         return { ...s, allBlocks, currentBlock: newBlock };
       } 
@@ -132,7 +133,7 @@ class Tick implements Action {
       Tick.isBlockCollided(s.currentBlock, existingBlock)
     );
 
-    const updatedCurrentBlock = collidesWithOtherBlocks ? createTetro() : s.currentBlock;
+    const updatedCurrentBlock = collidesWithOtherBlocks ? s.nextBlock : s.currentBlock;
     const updatedAllBlocks = collidesWithOtherBlocks
       ? (s.allBlocks || []).concat(s.currentBlock)
       : s.allBlocks;
@@ -160,7 +161,7 @@ class Tick implements Action {
 
     else {
       const currentBlock = s.currentBlock;
-      const newBlock = createTetro(); 
+      const newBlock = s.nextBlock; 
 
       return {
         ...s,
@@ -190,6 +191,16 @@ class Rotate implements Action {
     return s;
   };
 };
+
+class GenerateBlock implements Action {
+  constructor(public readonly random: number) { }
+
+  apply = (s: State) => {    
+    const newBlock = createTetro(this.random); 
+    return { ...s, nextBlock: newBlock }; // Update the state with the new Tetromino
+  };
+}
+
 
 const reduceState = (s: State, action: Action) => action.apply(s);
 

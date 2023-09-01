@@ -12,6 +12,7 @@ const Viewport = {
   
 const Constants = {
     TICK_RATE_MS: 10,
+    SEED: 1,
     GRID_WIDTH: 10,
     GRID_HEIGHT: 20,
 } as const;
@@ -40,6 +41,9 @@ enum CubeColor {
     Blue = "blue",
     Green = "green",
     Yellow = "yellow",
+    LightBlue = "lightblue",
+    Purple = "purple",
+    Orange = "orange"
 }
 
 type Cube = {
@@ -63,7 +67,8 @@ type State = Readonly<{
     gameEnd: boolean,
     score: number,
     highScore: number,
-    allBlocks: Array<Tetrominos> | null
+    allBlocks: Array<Tetrominos> | null,
+    nextBlock: Tetrominos,
 }>;
   
 const BlockType = {
@@ -72,12 +77,43 @@ const BlockType = {
         cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow},
         cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow}
         },
-        
-    I: {cube1: {x: 100, y: 0, shape: "I", color: CubeColor.Blue},
-        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue}, 
-        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue},
-        cube4: {x: 100 - 2*Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue}
-        }
+
+    I: {cube1: {x: 100, y: 0, shape: "I", color: CubeColor.LightBlue},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue}, 
+        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue},
+        cube4: {x: 100 - 2*Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue}
+        },
+
+    T: {cube1: {x: 100, y: 0, shape: "T", color: CubeColor.Purple},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple}, 
+        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple},
+        cube4: {x: 100  , y: Block.WIDTH, shape: "T", color: CubeColor.Purple}
+        },
+
+    J: {cube1: {x: 100, y: 0, shape: "J", color: CubeColor.Blue},
+        cube2: {x: 100, y: Block.WIDTH, shape: "J", color: CubeColor.Blue}, 
+        cube3: {x: 100, y: 2*Block.WIDTH, shape: "J", color: CubeColor.Blue},
+        cube4: {x: 100 - Block.WIDTH  , y: 2*Block.WIDTH, shape: "J", color: CubeColor.Blue}
+        },
+
+    L: {cube1: {x: 100, y: 0, shape: "L", color: CubeColor.Orange},
+        cube2: {x: 100, y: Block.WIDTH, shape: "L", color: CubeColor.Orange}, 
+        cube3: {x: 100, y: 2*Block.WIDTH, shape: "L", color: CubeColor.Orange},
+        cube4: {x: 100 + Block.WIDTH  , y: 2*Block.WIDTH, shape: "L", color: CubeColor.Orange}
+        },
+    
+    S: {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Green},
+        cube2: {x: 100 + Block.WIDTH, y: 0, shape: "S", color: CubeColor.Green}, 
+        cube3: {x: 100, y: Block.WIDTH, shape: "S", color: CubeColor.Green},
+        cube4: {x: 100 - Block.WIDTH  , y: Block.WIDTH, shape: "S", color: CubeColor.Green}
+        },
+    
+    Z: {cube1: {x: 100, y: 0, shape: "Z", color: CubeColor.Red},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "Z", color: CubeColor.Red}, 
+        cube3: {x: 100, y: Block.WIDTH, shape: "Z", color: CubeColor.Red},
+        cube4: {x: 100 + Block.WIDTH  , y: Block.WIDTH, shape: "Z", color: CubeColor.Red}
+        },
+
 } as const;
 /**
  * Actions modify state
