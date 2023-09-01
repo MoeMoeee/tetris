@@ -100,7 +100,7 @@ export function main() {
         width: `${Block.WIDTH}`,
         x: `${cube.x}`,
         y: `${cube.y}`,
-        style: "fill: green",
+        style: "fill: " + `${cube.color}`,
       });
       svg.appendChild(rect);
     });
@@ -113,7 +113,7 @@ export function main() {
             width: `${Block.WIDTH}`,
             x: `${cube.x}`,
             y: `${cube.y}`,
-            style: "fill: green",
+            style: "fill: " + `${cube.color}`,
           });
           svg.appendChild(rect);
         });
@@ -132,7 +132,7 @@ export function main() {
       width: `${Block.WIDTH}`,
       x: `${Block.WIDTH * 2}`,
       y: `${Block.HEIGHT}`,
-      style: "fill: green",
+      style: "fill: " + `${s.currentBlock.cube1.color}`,
     });
     preview.appendChild(cubePreview);
   };

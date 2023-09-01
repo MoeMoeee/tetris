@@ -1,4 +1,4 @@
-export {Viewport, Constants, Block, Position, CubeColor} 
+export {Viewport, Constants, Block, BlockType, CubeColor} 
 export type { Key, Event, Tetrominos, State, Action, Cube}
 
 /** Constants */
@@ -66,12 +66,18 @@ type State = Readonly<{
     allBlocks: Array<Tetrominos> | null
 }>;
   
-const Position = {
-    SPAWN_POS: {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Green},
-                cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S", color: CubeColor.Green}, 
-                cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Green},
-                cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Green}
-                }
+const BlockType = {
+    O:  {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Yellow},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S", color: CubeColor.Yellow}, 
+        cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow},
+        cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow}
+        },
+        
+    I: {cube1: {x: 100, y: 0, shape: "I", color: CubeColor.Blue},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue}, 
+        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue},
+        cube4: {x: 100 - 2*Block.WIDTH, y: 0, shape: "I", color: CubeColor.Blue}
+        }
 } as const;
 /**
  * Actions modify state

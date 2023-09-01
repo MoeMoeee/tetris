@@ -1,14 +1,34 @@
 
 import { Move, Tick } from "./state";
-import { Block, Constants, Cube, Position, State, Tetrominos, Viewport } from "./types";
+import { Block, Constants, Cube, BlockType, State, Tetrominos, Viewport } from "./types";
 
 export {hide, createSvgElement, createTetro, isEndGame}
 
 // tetro spawn position
 const createTetro = () => {
-  return Position.SPAWN_POS;
+  return BlockType.I;
 }
 
+
+// Code for creating random stream from Applied Class 
+export abstract class RNG {
+  // LCG using GCC's constants
+  private static m = 0x80000000; // 2**31
+  private static a = 1103515245;
+  private static c = 12345;
+
+  /**
+   * Call `hash` repeatedly to generate the sequence of hashes.
+   * @param seed
+   * @returns a hash of the seed
+   */
+  public static hash = (seed: number) => (RNG.a * seed + RNG.c) % RNG.m;
+
+  /**
+   * Takes hash value and scales it to the range [-1, 1]
+   */
+  public static scale = (hash: number) => (2 * hash) / (RNG.m - 1) - 1;
+}
   
 /**
  * Hides a SVG element on the canvas.
@@ -57,6 +77,8 @@ const isEndGame = (s: State): State => {
 
   return (collidesWithOtherBlocks) ? endGameState : currState;
 };
+
+
 
 
 

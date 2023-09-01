@@ -1,4 +1,4 @@
-import { Action, Block, Constants, Cube, Position, State, Tetrominos, Viewport } from "./types";
+import { Action, Block, Constants, Cube, State, Tetrominos, Viewport } from "./types";
 import {  createTetro, isEndGame } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
@@ -192,6 +192,7 @@ class Rotate implements Action {
 };
 
 const reduceState = (s: State, action: Action) => action.apply(s);
+
 
 
 // To know which row we need to remove, we need to check how many cubes 
