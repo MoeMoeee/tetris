@@ -11,7 +11,7 @@ const Viewport = {
 } as const;
   
 const Constants = {
-    TICK_RATE_MS: 100,
+    TICK_RATE_MS: 10,
     GRID_WIDTH: 10,
     GRID_HEIGHT: 20,
 } as const;

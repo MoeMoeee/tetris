@@ -1,5 +1,5 @@
-import { Action, Block, Cube, Position, State, Tetrominos, Viewport } from "./types";
-import { clearRow, createTetro, isEndGame } from "./utils";
+import { Action, Block, Constants, Cube, Position, State, Tetrominos, Viewport } from "./types";
+import {  createTetro, isEndGame } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move }
 
@@ -47,8 +47,8 @@ class Move implements Action {
   };
   
 
-  static isBlockInsideScreen = (s: State, moveDistance: number, axis: string): boolean => {
-    const { cube1, cube2, cube3, cube4 } = s.currentBlock;
+  static isBlockInsideScreen = (block: Tetrominos, moveDistance: number, axis: string): boolean => {
+    const { cube1, cube2, cube3, cube4 } = block;
   
     if (axis === 'x') {
       return (
@@ -71,7 +71,7 @@ class Move implements Action {
   };
       
 
-  static moveCube = (s: State, cube: Cube, moveDistance: number, axis: string) => {
+  static moveCube = ( cube: Cube, moveDistance: number, axis: string) => {
     return {
       ...cube,
       x: axis === 'x' ? cube.x + moveDistance : cube.x,
@@ -81,13 +81,13 @@ class Move implements Action {
 
   static moveBlock = (s: State, moveDistance: number, axis: string): State => {
     const shouldMoveBlock = () => 
-      Move.isBlockInsideScreen(s, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis);
+      Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis);
   
     const moveCubes = (block: Tetrominos) => ({
-      cube1: Move.moveCube(s, block.cube1, moveDistance, axis),
-      cube2: Move.moveCube(s, block.cube2, moveDistance, axis),
-      cube3: Move.moveCube(s, block.cube3, moveDistance, axis),
-      cube4: Move.moveCube(s, block.cube4, moveDistance, axis),
+      cube1: Move.moveCube(block.cube1, moveDistance, axis),
+      cube2: Move.moveCube(block.cube2, moveDistance, axis),
+      cube3: Move.moveCube(block.cube3, moveDistance, axis),
+      cube4: Move.moveCube(block.cube4, moveDistance, axis),
     });
   
     const moveOrNewBlock = () => {
@@ -95,7 +95,7 @@ class Move implements Action {
         return { ...s, currentBlock: moveCubes(s.currentBlock) };
       } 
       
-      else if (!Move.isBlockInsideScreen(s, moveDistance, axis) && axis === 'y') 
+      else if (!Move.isBlockInsideScreen(s.currentBlock, moveDistance, axis) && axis === 'y') 
       {
         const newBlock = createTetro();
         const allBlocks = s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, s.currentBlock];
@@ -112,7 +112,7 @@ class Move implements Action {
   
 
   apply = (s: State) => {
-    return isEndGame(Move.moveBlock(s, this.moveDistance, this.axis));
+    return clearRow(isEndGame(Move.moveBlock(s, this.moveDistance, this.axis)));
   };
 };
 
@@ -145,12 +145,12 @@ class Tick implements Action {
   }
 
   static moveTetroDown = (s: State): State => {
-    if (Move.isBlockInsideScreen(s, 5, "y")) {
+    if (Move.isBlockInsideScreen(s.currentBlock, 5, "y")) {
       const newBlock = {
-        cube1: Move.moveCube(s, s.currentBlock.cube1, 1, "y"),
-        cube2: Move.moveCube(s, s.currentBlock.cube2, 1, "y"),
-        cube3: Move.moveCube(s, s.currentBlock.cube3, 1, "y"),
-        cube4: Move.moveCube(s, s.currentBlock.cube4, 1, "y"),
+        cube1: Move.moveCube(s.currentBlock.cube1, 1, "y"),
+        cube2: Move.moveCube(s.currentBlock.cube2, 1, "y"),
+        cube3: Move.moveCube(s.currentBlock.cube3, 1, "y"),
+        cube4: Move.moveCube(s.currentBlock.cube4, 1, "y"),
       };
       return {
         ...s,
@@ -184,7 +184,6 @@ class Tick implements Action {
 }
 
 
-
 class Rotate implements Action {
   // TODO
   apply = (s: State) => {
@@ -193,6 +192,70 @@ class Rotate implements Action {
 };
 
 const reduceState = (s: State, action: Action) => action.apply(s);
+
+
+// To know which row we need to remove, we need to check how many cubes 
+// are in an y-axis across all CANVAS_HEIGHT
+// After clear the row, we also need to drop down the stacked blocks 
+// and increment the score 
+const clearRow = (s: State): State => {
+  const { allBlocks } = s;
+
+  if (!allBlocks) {
+    return s;
+  }
+
+  const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
+
+  allBlocks.forEach((block) => {
+    Object.values(block).forEach((cube) => {
+      if (cube.y >= 0) {
+        rowOccupancy[cube.y] += 1;
+      }
+    });
+  });
+
+  const newAllBlocks = allBlocks.filter((block: Tetrominos) =>
+    !Object.values(block).every((cube) =>
+      cube.y >= 0 && rowOccupancy[cube.y] === Constants.GRID_WIDTH
+    )
+  );
+
+  if (newAllBlocks.length < allBlocks.length) {
+    const dropDistance = (allBlocks.length - newAllBlocks.length)*2
+    
+    console.log(dropDistance);
+    
+
+    const newState = {
+      ...s,
+      allBlocks: dropBlockDown(newAllBlocks, dropDistance),
+      score: s.score + dropDistance * 100,
+    };
+
+    return newState;
+  }
+
+  return s;
+};
+
+const dropBlockDown = (blockToDrop: Array<Tetrominos>, dropDistance: number): Array<Tetrominos> => {
+  const moveDistance = dropDistance/5 * Block.HEIGHT;
+
+  return blockToDrop.map((block) => {
+    const { cube1, cube2, cube3, cube4 } = block;
+    if (Move.isBlockInsideScreen(block, 20, "y")) {
+      return {
+        cube1: Move.moveCube(cube1, moveDistance, "y"),
+        cube2: Move.moveCube(cube2, moveDistance, "y"),
+        cube3: Move.moveCube(cube3, moveDistance, "y"),
+        cube4: Move.moveCube(cube4, moveDistance, "y"),
+      };
+    } else {
+      return block;
+    }
+  });
+};
 
 
 
