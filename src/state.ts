@@ -28,8 +28,8 @@ class Move implements Action {
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
           Object.values(block).some(prevCube =>
-            currCube.x === prevCube.x &&
-            currCube.y + moveDistance + Block.HEIGHT >= prevCube.y
+            currCube!.x === prevCube!.x &&
+            currCube!.y + moveDistance + Block.HEIGHT >= prevCube!.y
           )
         )
       );
@@ -41,9 +41,9 @@ class Move implements Action {
           // here means that the current block cannot be moved left/right
           // if other blocks is occupied
           Object.values(block).some(prevCube =>
-            currCube.x + moveDistance === prevCube.x && 
-            currCube.y + Block.HEIGHT >= prevCube.y && 
-            currCube.y - Block.HEIGHT <= prevCube.y
+            currCube!.x + moveDistance === prevCube!.x && 
+            currCube!.y + Block.HEIGHT >= prevCube!.y && 
+            currCube!.y - Block.HEIGHT <= prevCube!.y
           )
         )
       );
@@ -59,19 +59,21 @@ class Move implements Action {
     const { cube1, cube2, cube3, cube4 } = block;
   
     if (axis === 'x') {
+      // check the boundary of x coordinates
       return (
-        (cube1.x + moveDistance >= 0 && cube1.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
-        (cube2.x + moveDistance >= 0 && cube2.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
-        (cube3.x + moveDistance >= 0 && cube3.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
-        (cube4.x + moveDistance >= 0 && cube4.x + moveDistance < Viewport.CANVAS_WIDTH - 15)
+        (cube1!.x + moveDistance >= 0 && cube1!.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
+        (cube2!.x + moveDistance >= 0 && cube2!.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
+        (cube3!.x + moveDistance >= 0 && cube3!.x + moveDistance < Viewport.CANVAS_WIDTH - 15) &&
+        (cube4!.x + moveDistance >= 0 && cube4!.x + moveDistance < Viewport.CANVAS_WIDTH - 15)
       );
     } 
     else if (axis === 'y') {
+      // check the boundary of x coordinates
       return (
-        (cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
-        (cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
-        (cube3.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
-        (cube4.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15)
+        (cube1!.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube2!.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube3!.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
+        (cube4!.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15)
       );
     }
 
@@ -88,16 +90,22 @@ class Move implements Action {
   };
 
   static moveBlock = (s: State, moveDistance: number, axis: string): State => {
+    // when we move the block, we need to determine if the move is valid
+    // valid means the block will be inside the screen and won't collide with others
     const shouldMoveBlock = () => 
       Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) && !this.iscollideWhenMove(s, moveDistance, axis);
-  
+    
+    // execute the move
     const moveCubes = (block: Tetrominos) => ({
-      cube1: Move.moveCube(block.cube1, moveDistance, axis),
-      cube2: Move.moveCube(block.cube2, moveDistance, axis),
-      cube3: Move.moveCube(block.cube3, moveDistance, axis),
-      cube4: Move.moveCube(block.cube4, moveDistance, axis),
+      cube1: Move.moveCube(block.cube1!, moveDistance, axis),
+      cube2: Move.moveCube(block.cube2!, moveDistance, axis),
+      cube3: Move.moveCube(block.cube3!, moveDistance, axis),
+      cube4: Move.moveCube(block.cube4!, moveDistance, axis),
     });
-  
+    
+    // this function checks if the move, then executes the move
+    // if it reaches the bottom then we create a new block
+    // and return the state of the action move/new block
     const moveOrNewBlock = () => {
       if (shouldMoveBlock()) {
         return { ...s, currentBlock: moveCubes(s.currentBlock) };
@@ -105,11 +113,13 @@ class Move implements Action {
       
       else if (!Move.isBlockInsideScreen(s.currentBlock, moveDistance, axis) && axis === 'y') 
       {
+        // create a new block and added the new block to the current block array
         const newBlock = s.nextBlock;
         const allBlocks = s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, s.currentBlock];
         return { ...s, allBlocks, currentBlock: newBlock };
       } 
       
+      // else do nothing
       else {
         return s;
       }
@@ -118,7 +128,7 @@ class Move implements Action {
     return moveOrNewBlock();
   };
   
-
+  // action function
   apply = (s: State) => {
     return clearRow(isEndGame(Move.moveBlock(s, this.moveDistance, this.axis)));
   };
@@ -126,8 +136,8 @@ class Move implements Action {
 
 class Tick implements Action {
   static isBlockCollided = (currBlock: Tetrominos, allBlock: Tetrominos): boolean => {
-    const isCollision = (cubeA: { x: number; y: number }) => (cubeB: { x: number; y: number }) =>
-      cubeA.x === cubeB.x && cubeA.y + Block.HEIGHT === cubeB.y;
+    const isCollision = (cubeA: Cube | null) => (cubeB: Cube | null) =>
+      cubeA!.x === cubeB!.x && cubeA!.y + Block.HEIGHT === cubeB!.y;
   
     return Object.values(currBlock).some(currBlock =>
       Object.values(allBlock).some(isCollision(currBlock))
@@ -155,10 +165,10 @@ class Tick implements Action {
   static moveTetroDown = (s: State): State => {
     if (Move.isBlockInsideScreen(s.currentBlock, 5, "y")) {
       const newBlock = {
-        cube1: Move.moveCube(s.currentBlock.cube1, 1, "y"),
-        cube2: Move.moveCube(s.currentBlock.cube2, 1, "y"),
-        cube3: Move.moveCube(s.currentBlock.cube3, 1, "y"),
-        cube4: Move.moveCube(s.currentBlock.cube4, 1, "y"),
+        cube1: Move.moveCube(s.currentBlock.cube1!, 1, "y"),
+        cube2: Move.moveCube(s.currentBlock.cube2!, 1, "y"),
+        cube3: Move.moveCube(s.currentBlock.cube3!, 1, "y"),
+        cube4: Move.moveCube(s.currentBlock.cube4!, 1, "y"),
       };
       return {
         ...s,
@@ -211,15 +221,15 @@ class GenerateBlock implements Action {
 
 
 class Reset implements Action {
+  // reset action
+  // we want to reset the state by setting the new state 
+  // as the initial state and keep high score from the previous
   apply = (s: State) => {
-
-    
     const newState = {
       ...initialState,
       highScore: s.highScore, 
     };
-    console.log(newState);
-    
+
     return newState;
   };
 }
@@ -228,12 +238,6 @@ class Reset implements Action {
 
 const reduceState = (s: State, action: Action) => action.apply(s);
 
-
-
-// To know which row we need to remove, we need to check how many cubes 
-// are in an y-axis across all CANVAS_HEIGHT
-// After clear the row, we also need to drop down the stacked blocks 
-// and increment the score 
 const clearRow = (s: State): State => {
   const { allBlocks } = s;
 
@@ -241,56 +245,47 @@ const clearRow = (s: State): State => {
     return s;
   }
 
+  // Array to keep track of row occupancy
   const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
 
+  // Update the array if there are blocks in the current row
   allBlocks.forEach((block) => {
     Object.values(block).forEach((cube) => {
-      if (cube.y >= 0) {
-        rowOccupancy[cube.y] += 1;
+      if (cube!.y >= 0) {
+        rowOccupancy[cube!.y] += 1;
       }
     });
   });
 
-  const newAllBlocks = allBlocks.filter((block: Tetrominos) =>
-    !Object.values(block).every((cube) =>
-      cube.y >= 0 && rowOccupancy[cube.y] === Constants.GRID_WIDTH
-    )
-  );
+  // Calculate the number of cleared rows
+  const rowToRemove = rowOccupancy.filter((count) => count === Constants.GRID_WIDTH);
+  const rowsCleared = rowToRemove.length;
 
-  if (newAllBlocks.length < allBlocks.length) {
-    const dropDistance = (allBlocks.length - newAllBlocks.length) * 2;
-  
+  // Filter out rows that are not fully occupied
+  const newAllBlocks = allBlocks.map((block: Tetrominos) => {
+    const cubes = Object.values(block).filter((cube) =>
+      rowOccupancy[cube!.y] !== Constants.GRID_WIDTH
+    );
+
+    return cubes;
+  });
+
+  // if we need to clear row, update the allBlocks, current score and 
+  if (rowsCleared > 0) {
     const newState = {
       ...s,
-      allBlocks: dropBlockDown(newAllBlocks, dropDistance),
-      score: s.score + dropDistance * 100,
-      highScore: Math.max(s.highScore, s.score + dropDistance * 100) // Update highScore with the updated s.score
+      allBlocks: newAllBlocks,
+      score: s.score + rowsCleared * 1000, // Update the score based on cleared rows
+      highScore: Math.max(s.highScore, s.score + rowsCleared * 1000),
     };
-  
+
     return newState;
   }
-  
 
   return s;
 };
 
-const dropBlockDown = (blockToDrop: Array<Tetrominos>, dropDistance: number): Array<Tetrominos> => {
-  const moveDistance = dropDistance/5 * Block.HEIGHT;
 
-  return blockToDrop.map((block) => {
-    const { cube1, cube2, cube3, cube4 } = block;
-    if (Move.isBlockInsideScreen(block, 20, "y")) {
-      return {
-        cube1: Move.moveCube(cube1, moveDistance, "y"),
-        cube2: Move.moveCube(cube2, moveDistance, "y"),
-        cube3: Move.moveCube(cube3, moveDistance, "y"),
-        cube4: Move.moveCube(cube4, moveDistance, "y"),
-      };
-    } else {
-      return block;
-    }
-  });
-};
 
 
 

@@ -11,7 +11,7 @@ const Viewport = {
 } as const;
   
 const Constants = {
-    TICK_RATE_MS: 10,
+    TICK_RATE_MS: 5,
     SEED: 1,
     GRID_WIDTH: 10,
     GRID_HEIGHT: 20,
@@ -22,9 +22,6 @@ const Block = {
     HEIGHT: Viewport.CANVAS_HEIGHT / Constants.GRID_HEIGHT,
 }
 
-
-  
-  
   
 /** User input */
 
@@ -53,13 +50,11 @@ type Cube = {
     color: CubeColor,
 };
 
-
-// consist of 4 cubes
 type Tetrominos = Readonly<{
-    cube1: Cube;
-    cube2: Cube;
-    cube3: Cube;
-    cube4: Cube;
+    cube1: Cube | null;
+    cube2: Cube | null;
+    cube3: Cube | null;
+    cube4: Cube | null;
 }>
 
 type State = Readonly<{

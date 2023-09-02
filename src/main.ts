@@ -101,9 +101,9 @@ export function main() {
       const rect = createSvgElement(preview.namespaceURI, "rect", {
         height: `${Block.HEIGHT}`,
         width: `${Block.WIDTH}`,
-        x: `${cube.x}`,
-        y: `${cube.y}`,
-        style: "fill: " + `${cube.color}`,
+        x: `${cube!.x}`,
+        y: `${cube!.y}`,
+        style: "fill: " + `${cube!.color}`,
       });
       svg.appendChild(rect);
     });
@@ -114,9 +114,9 @@ export function main() {
           const rect = createSvgElement(preview.namespaceURI, "rect", {
             height: `${Block.HEIGHT}`,
             width: `${Block.WIDTH}`,
-            x: `${cube.x}`,
-            y: `${cube.y}`,
-            style: "fill: " + `${cube.color}`,
+            x: `${cube!.x}`,
+            y: `${cube!.y}`,
+            style: "fill: " + `${cube!.color}`,
           });
           svg.appendChild(rect);
         });
@@ -130,21 +130,20 @@ export function main() {
 
 
     // Add a block to the preview canvas
-    Object.values(s.nextBlock).forEach(cube => {
-      const cubePreview = createSvgElement(preview.namespaceURI, "rect", {
-        height: `${Block.HEIGHT}`,
-        width: `${Block.WIDTH}`,
-        x: `${cube.x - Block.WIDTH}`,
-        y: `${cube.y + Block.HEIGHT}`,
-        style: "fill: " + `${cube.color}`,
-      });
-      preview.appendChild(cubePreview);
-    });
+    // Object.values(s.nextBlock).forEach(cube => {
+    //   const cubePreview = createSvgElement(preview.namespaceURI, "rect", {
+    //     height: `${Block.HEIGHT}`,
+    //     width: `${Block.WIDTH}`,
+    //     x: `${cube.x - Block.WIDTH}`,
+    //     y: `${cube.y + Block.HEIGHT}`,
+    //     style: "fill: " + `${cube.color}`,
+    //   });
+    //   preview.appendChild(cubePreview);
+    // });
   };
 
   const gameClock$ = tick$.pipe(scan(() => new Tick(), initialState));
   const gameRand$ = rngStream$.pipe(
-    debounceTime(100),
     map(randomValue => new GenerateBlock(randomValue)),
     
   );
