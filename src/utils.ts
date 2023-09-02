@@ -10,6 +10,7 @@ export {hide, createSvgElement, createTetro, isEndGame}
 const createTetro = (random: number) => {
   const scaleRandom = RNG.scale(RNG.hash(random));
   
+  // create certain blocks based on the random number
   if (scaleRandom >= -1 && scaleRandom < -0.9) {
     return BlockType.I;
   } 
@@ -37,6 +38,7 @@ const createTetro = (random: number) => {
 };
 
   
+// My code from Applied Class 
 
 export function createRngStreamFromSource<T>(source$: Observable<T>) {
   return function createRngStream(
@@ -102,13 +104,14 @@ const createSvgElement = (
 };
 
 const blockMatchedCurrent = (blockA: Tetrominos, blockB: Tetrominos): boolean => {
-  const isCollision = (cubeA: Cube) => (cubeB: Cube) =>
-    cubeA.x === cubeB.x && cubeA.y === cubeB.y;
+  const isCollision = (cubeA: Cube | null, cubeB: Cube | null) =>
+    cubeA !== null && cubeB !== null && cubeA.x === cubeB.x && cubeA.y === cubeB.y;
 
-  return Object.values(blockA).some(cubeA =>
-    Object.values(blockB).some(isCollision(cubeA))
+  return Object.values(blockA).some((cubeA) =>
+    Object.values(blockB).some((cubeB) => isCollision(cubeA, cubeB))
   );
 };
+
 
 const isEndGame = (s: State): State => {
   const currState = s;

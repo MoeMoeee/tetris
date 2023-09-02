@@ -109,19 +109,22 @@ export function main() {
     });
 
     if (s.allBlocks !== null) {
-      s.allBlocks.forEach(block => {
-        Object.values(block).forEach(cube => {
-          const rect = createSvgElement(preview.namespaceURI, "rect", {
-            height: `${Block.HEIGHT}`,
-            width: `${Block.WIDTH}`,
-            x: `${cube!.x}`,
-            y: `${cube!.y}`,
-            style: "fill: " + `${cube!.color}`,
-          });
-          svg.appendChild(rect);
+      s.allBlocks.forEach((block) => {
+        Object.values(block).forEach((cube) => {
+          if (cube !== null) {
+            const rect = createSvgElement(preview.namespaceURI, "rect", {
+              height: `${Block.HEIGHT}`,
+              width: `${Block.WIDTH}`,
+              x: `${cube.x}`, 
+              y: `${cube.y}`, 
+              style: "fill: " + `${cube.color}`,
+            });
+            svg.appendChild(rect);
+          }
         });
       });
     }
+    
 
     
     // Render score

@@ -23,27 +23,29 @@ class Move implements Action {
   // this function checks if we move the block, will it collide with others
   // we need to account for the move distance of the block when we move
   static iscollideWhenMove = (s: State, moveDistance: number, axis: string): boolean => {
-    // this checks when we move block down
+    // this checks when we move the block down
     if (axis === 'y') {
-      return Object.values(s.currentBlock).some(currCube =>
-        s.allBlocks?.some(block =>
-          Object.values(block).some(prevCube =>
-            currCube!.x === prevCube!.x &&
-            currCube!.y + moveDistance + Block.HEIGHT >= prevCube!.y
+      return Object.values(s.currentBlock).some((currCube) =>
+        s.allBlocks?.some((block) =>
+          Object.values(block).some((prevCube) =>
+            currCube !== null && prevCube !== null &&
+            currCube.x === prevCube.x &&
+            currCube.y + moveDistance + Block.HEIGHT >= prevCube.y
           )
         )
       );
     }
-    // here to check when move block left/right
-    else if (axis === 'x') {  
-      return Object.values(s.currentBlock).some(currCube =>
-        s.allBlocks?.some(block =>
+    // here to check when moving the block left/right
+    else if (axis === 'x') {
+      return Object.values(s.currentBlock).some((currCube) =>
+        s.allBlocks?.some((block) =>
           // here means that the current block cannot be moved left/right
-          // if other blocks is occupied
-          Object.values(block).some(prevCube =>
-            currCube!.x + moveDistance === prevCube!.x && 
-            currCube!.y + Block.HEIGHT >= prevCube!.y && 
-            currCube!.y - Block.HEIGHT <= prevCube!.y
+          // if other blocks are occupied
+          Object.values(block).some((prevCube) =>
+            currCube !== null && prevCube !== null &&
+            currCube.x + moveDistance === prevCube.x &&
+            currCube.y + Block.HEIGHT >= prevCube.y &&
+            currCube.y - Block.HEIGHT <= prevCube.y
           )
         )
       );
@@ -51,6 +53,7 @@ class Move implements Action {
   
     return false;
   };
+  
   
   // this checks if the block is inside the canvas when we move
   // we need to account for the move distance of the block when we move
@@ -136,13 +139,14 @@ class Move implements Action {
 
 class Tick implements Action {
   static isBlockCollided = (currBlock: Tetrominos, allBlock: Tetrominos): boolean => {
-    const isCollision = (cubeA: Cube | null) => (cubeB: Cube | null) =>
-      cubeA!.x === cubeB!.x && cubeA!.y + Block.HEIGHT === cubeB!.y;
+    const isCollision = (cubeA: Cube | null, cubeB: Cube | null) =>
+      cubeA !== null && cubeB !== null && cubeA.x === cubeB.x && cubeA.y + Block.HEIGHT === cubeB.y;
   
-    return Object.values(currBlock).some(currBlock =>
-      Object.values(allBlock).some(isCollision(currBlock))
+    return Object.values(currBlock).some((cubeA) =>
+      Object.values(allBlock).some((cubeB) => isCollision(cubeA, cubeB))
     );
   };
+  
 
   static detectCollisions = (s: State): State => {
     //check the current block collision vs others
@@ -251,7 +255,7 @@ const clearRow = (s: State): State => {
   // Update the array if there are blocks in the current row
   allBlocks.forEach((block) => {
     Object.values(block).forEach((cube) => {
-      if (cube!.y >= 0) {
+      if (cube !== null && cube!.y >= 0) {
         rowOccupancy[cube!.y] += 1;
       }
     });
@@ -262,13 +266,23 @@ const clearRow = (s: State): State => {
   const rowsCleared = rowToRemove.length;
 
   // Filter out rows that are not fully occupied
+  // Filter out rows that are not fully occupied
   const newAllBlocks = allBlocks.map((block: Tetrominos) => {
     const cubes = Object.values(block).filter((cube) =>
-      rowOccupancy[cube!.y] !== Constants.GRID_WIDTH
+      cube !== null && rowOccupancy[cube!.y] !== Constants.GRID_WIDTH 
     );
 
-    return cubes;
+  // Create a new Tetrominos object with updated cubes
+  const newBlock: Tetrominos = {
+    cube1: cubes[0] || null,
+    cube2: cubes[1] || null,
+    cube3: cubes[2] || null,
+    cube4: cubes[3] || null,
+  };
+
+  return newBlock;
   });
+
 
   // if we need to clear row, update the allBlocks, current score and 
   if (rowsCleared > 0) {
