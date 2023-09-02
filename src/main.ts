@@ -15,10 +15,10 @@
 import "./style.css";
 
 import { Observable, concat, fromEvent, interval, merge } from "rxjs";
-import { map, filter, scan, takeWhile } from "rxjs/operators";
+import { map, filter, scan, takeWhile, bufferCount, takeUntil, distinctUntilChanged, debounceTime } from "rxjs/operators";
 import {hide, createSvgElement, createRngStreamFromSource} from "./utils";
 import { Key, Event, Tetrominos, State, Block, Viewport, Constants, Action } from './types'
-import { initialState, reduceState, Rotate, Tick, Move, GenerateBlock } from './state';
+import { initialState, reduceState, Rotate, Tick, Move, GenerateBlock, Reset } from './state';
 
 
 /**
@@ -61,12 +61,16 @@ export function main() {
   const left$ = fromKey("KeyA");
   const right$ = fromKey("KeyD");
   const down$ = fromKey("KeyS");
-  
+  const reset$ = fromKey("KeyR");
+
+
   const moveLeft$ = left$.pipe(map(_ => new Move(-Block.WIDTH , "x")));
   const moveRight$ = right$.pipe(map(_ => new Move(Block.WIDTH, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
-    
+  const gameReset$ = reset$.pipe(map(_ => new Reset()));
 
+    
+      
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
   const rngStream$ = createRngStreamFromSource(interval(50))(Constants.SEED);
@@ -122,32 +126,34 @@ export function main() {
     
     // Render score
     scoreText.textContent = `${s.score}`;
-    highScoreText.textContent = `${s.score}`;
+    highScoreText.textContent = `${s.highScore}`;
 
 
     // Add a block to the preview canvas
-    const cubePreview = createSvgElement(preview.namespaceURI, "rect", {
-      height: `${Block.HEIGHT}`,
-      width: `${Block.WIDTH}`,
-      x: `${Block.WIDTH * 2}`,
-      y: `${Block.HEIGHT}`,
-      style: "fill: " + `${s.currentBlock.cube1.color}`,
+    Object.values(s.nextBlock).forEach(cube => {
+      const cubePreview = createSvgElement(preview.namespaceURI, "rect", {
+        height: `${Block.HEIGHT}`,
+        width: `${Block.WIDTH}`,
+        x: `${cube.x - Block.WIDTH}`,
+        y: `${cube.y + Block.HEIGHT}`,
+        style: "fill: " + `${cube.color}`,
+      });
+      preview.appendChild(cubePreview);
     });
-    preview.appendChild(cubePreview);
   };
 
   const gameClock$ = tick$.pipe(scan(() => new Tick(), initialState));
   const gameRand$ = rngStream$.pipe(
+    debounceTime(100),
     map(randomValue => new GenerateBlock(randomValue)),
+    
   );
-  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$, gameRand$);
+  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$, gameRand$, gameReset$);
   const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
   const subscription = 
   state$.subscribe((s: State) => {
     if (s.gameEnd) {
-      subscription.unsubscribe();
       show(gameover);
-
     } else {
       render(s);
 

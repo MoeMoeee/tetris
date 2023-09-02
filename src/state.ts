@@ -1,7 +1,7 @@
 import { Action, Block, Constants, Cube, State, Tetrominos, Viewport } from "./types";
 import {  createTetro, isEndGame } from "./utils";
 
-export { initialState, reduceState, Rotate, Tick, Move, GenerateBlock}
+export { initialState, reduceState, Rotate, Tick, Move, GenerateBlock, Reset}
 
 
 
@@ -20,7 +20,10 @@ nextBlock: createTetro(1),
 class Move implements Action {
   constructor(public readonly moveDistance: number, public readonly axis: string) { } 
 
+  // this function checks if we move the block, will it collide with others
+  // we need to account for the move distance of the block when we move
   static iscollideWhenMove = (s: State, moveDistance: number, axis: string): boolean => {
+    // this checks when we move block down
     if (axis === 'y') {
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
@@ -31,10 +34,12 @@ class Move implements Action {
         )
       );
     }
-    else if (axis === 'x') {
-      
+    // here to check when move block left/right
+    else if (axis === 'x') {  
       return Object.values(s.currentBlock).some(currCube =>
         s.allBlocks?.some(block =>
+          // here means that the current block cannot be moved left/right
+          // if other blocks is occupied
           Object.values(block).some(prevCube =>
             currCube.x + moveDistance === prevCube.x && 
             currCube.y + Block.HEIGHT >= prevCube.y && 
@@ -47,6 +52,8 @@ class Move implements Action {
     return false;
   };
   
+  // this checks if the block is inside the canvas when we move
+  // we need to account for the move distance of the block when we move
 
   static isBlockInsideScreen = (block: Tetrominos, moveDistance: number, axis: string): boolean => {
     const { cube1, cube2, cube3, cube4 } = block;
@@ -71,7 +78,7 @@ class Move implements Action {
     return false;
   };
       
-
+  // here is the action to move the cube left/right/down with certain distance
   static moveCube = ( cube: Cube, moveDistance: number, axis: string) => {
     return {
       ...cube,
@@ -195,11 +202,28 @@ class Rotate implements Action {
 class GenerateBlock implements Action {
   constructor(public readonly random: number) { }
 
+
   apply = (s: State) => {    
-    const newBlock = createTetro(this.random); 
-    return { ...s, nextBlock: newBlock }; // Update the state with the new Tetromino
+    const newBlock = createTetro(this.random); // Use the first value in the array
+    return { ...s, nextBlock: newBlock };
   };
 }
+
+
+class Reset implements Action {
+  apply = (s: State) => {
+
+    
+    const newState = {
+      ...initialState,
+      highScore: s.highScore, 
+    };
+    console.log(newState);
+    
+    return newState;
+  };
+}
+
 
 
 const reduceState = (s: State, action: Action) => action.apply(s);
@@ -234,19 +258,18 @@ const clearRow = (s: State): State => {
   );
 
   if (newAllBlocks.length < allBlocks.length) {
-    const dropDistance = (allBlocks.length - newAllBlocks.length)*2
-    
-    console.log(dropDistance);
-    
-
+    const dropDistance = (allBlocks.length - newAllBlocks.length) * 2;
+  
     const newState = {
       ...s,
       allBlocks: dropBlockDown(newAllBlocks, dropDistance),
       score: s.score + dropDistance * 100,
+      highScore: Math.max(s.highScore, s.score + dropDistance * 100) // Update highScore with the updated s.score
     };
-
+  
     return newState;
   }
+  
 
   return s;
 };

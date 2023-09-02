@@ -10,23 +10,28 @@ export {hide, createSvgElement, createTetro, isEndGame}
 const createTetro = (random: number) => {
   const scaleRandom = RNG.scale(RNG.hash(random));
   
-  console.log(scaleRandom);
-  
   if (scaleRandom >= -1 && scaleRandom < -0.9) {
     return BlockType.I;
-  } else if (scaleRandom >= -0.9 && scaleRandom < -0.8) {
+  } 
+  else if (scaleRandom >= -0.9 && scaleRandom < -0.8) {
     return BlockType.O;
-  } else if (scaleRandom >= -0.8 && scaleRandom < -0.7) {
+  } 
+  else if (scaleRandom >= -0.8 && scaleRandom < -0.7) {
     return BlockType.T;
-  } else if (scaleRandom >= -0.7 && scaleRandom < -0.6) {
+  } 
+  else if (scaleRandom >= -0.7 && scaleRandom < -0.6) {
     return BlockType.J;
-  } else if (scaleRandom >= -0.6 && scaleRandom < -0.5) {
+  } 
+  else if (scaleRandom >= -0.6 && scaleRandom < -0.5) {
     return BlockType.L;
-  } else if (scaleRandom >= -0.5 && scaleRandom < -0.4) {
+  } 
+  else if (scaleRandom >= -0.5 && scaleRandom < -0.4) {
     return BlockType.S;
-  } else if (scaleRandom >= -0.4 && scaleRandom < -0.3) {
+  } 
+  else if (scaleRandom >= -0.4 && scaleRandom < -0.3) {
     return BlockType.Z;
-  } else {
+  } 
+  else {
     return BlockType.O; 
   }
 };
