@@ -14,6 +14,8 @@ score: 0,
 highScore: 0,
 allBlocks: null,
 nextBlock: createTetro(1),
+rowCleared: 0,
+
 } as const;
 
 // class construction based on readings!
@@ -62,6 +64,7 @@ class Move implements Action {
     const { cube1, cube2, cube3, cube4 } = block;
   
     // Check the boundary of x coordinates 
+    // -15 so it looks better
     const xBoundaryCheck = (
       (!cube1 || (cube1.x + moveDistance >= 0 && cube1.x + moveDistance < Viewport.CANVAS_WIDTH - 15)) &&
       (!cube2 || (cube2.x + moveDistance >= 0 && cube2.x + moveDistance < Viewport.CANVAS_WIDTH - 15)) &&
@@ -70,6 +73,7 @@ class Move implements Action {
     );
   
     // Check the boundary of y coordinates
+    // -15 so it looks better
     const yBoundaryCheck = (
       (!cube1 || cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
       (!cube2 || cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
@@ -99,7 +103,7 @@ class Move implements Action {
       };
     }
     // Handle the case where cube is null or undefined
-    return null; // or return a default value or handle the error accordingly
+    return null; 
   };
   
 
@@ -152,6 +156,9 @@ class Move implements Action {
 
 class Tick implements Action {
   static isBlockCollided = (currBlock: Tetrominos, allBlock: Tetrominos): boolean => {
+    // check if the current block collides with any blocks in the screen
+    // here we create another collision check since 
+    // its a bit different from checking is collision when move
     const isCollision = (cubeA: Cube | null, cubeB: Cube | null) =>
       cubeA !== null && cubeB !== null && cubeA.x === cubeB.x && cubeA.y + Block.HEIGHT === cubeB.y;
   
@@ -166,12 +173,14 @@ class Tick implements Action {
     const collidesWithOtherBlocks = s.allBlocks?.some(existingBlock =>
       Tick.isBlockCollided(s.currentBlock, existingBlock)
     );
-
+    
+    // if collides, then we generate new block from the top
     const updatedCurrentBlock = collidesWithOtherBlocks ? s.nextBlock : s.currentBlock;
     const updatedAllBlocks = collidesWithOtherBlocks
-      ? (s.allBlocks || []).concat(s.currentBlock)
-      : s.allBlocks;
-  
+      ? (s.allBlocks || []).
+      concat(s.currentBlock): s.allBlocks; //we also want to update the current block to all blocks array
+
+    // return the updated 
     return {
       ...s,
       currentBlock: updatedCurrentBlock,
@@ -180,6 +189,8 @@ class Tick implements Action {
   }
 
   static moveTetroDown = (s: State): State => {
+    // check if the block next move distance will be in the screen
+    // if yes then move
     if (Move.isBlockInsideScreen(s.currentBlock, 5, "y")) {
       const newBlock = {
         cube1: Move.moveCube(s.currentBlock.cube1!, 1, "y"),
@@ -193,6 +204,9 @@ class Tick implements Action {
       };
     }
 
+    // if not in the screen, then we already touch the bottom
+    // we added the current block to the array
+    // and create a new block and continue the game
     else {
       const currentBlock = s.currentBlock;
       const newBlock = s.nextBlock; 
@@ -218,11 +232,14 @@ class Tick implements Action {
   };
 }
   class Rotate implements Action {
+    // perform a rotation for different shape of blocks
     apply(s: State): State {
       const { currentBlock } = s;
   
       const checkValid = (currentBlock && currentBlock.cube1 && currentBlock.cube2 && currentBlock.cube3 && currentBlock.cube4)
-  
+      
+      // check if the current block and be rotated by checking its rotation
+
       if (checkValid && currentBlock.cube1.shape === "I") {
         const rotatedBlock = Rotate.rotateI(currentBlock);
         if (rotatedBlock !== null) {
@@ -255,7 +272,7 @@ class Tick implements Action {
     }
 
   
-
+    // logic to rotate shape I
     static rotateI = (currentBlock: Tetrominos): Tetrominos | null => {
       // Check if currentBlock or any of its cubes are null
       if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
@@ -287,6 +304,7 @@ class Tick implements Action {
       }
     };
 
+    // logic to rotate shape T
     static rotateT = (currentBlock: Tetrominos): Tetrominos | null => {
       // Check if currentBlock or any of its cubes are null
       if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
@@ -344,6 +362,7 @@ class Tick implements Action {
       }
     };
 
+    // logic to rotate shape Z
     static rotateZ = (currentBlock: Tetrominos): Tetrominos | null => {
       // Check if currentBlock or any of its cubes are null
       if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
@@ -377,6 +396,7 @@ class Tick implements Action {
       }
     }
 
+    //// logic to rotate shape J
     static rotateJ = (currentBlock: Tetrominos): Tetrominos | null => {
       // Check if currentBlock or any of its cubes are null
       if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
@@ -465,7 +485,7 @@ class Reset implements Action {
 }
 
 
-
+// to determine what action we do
 const reduceState = (s: State, action: Action) => action.apply(s);
 
 const clearRow = (s: State): State => {
@@ -476,6 +496,11 @@ const clearRow = (s: State): State => {
   }
 
   // Array to keep track of row occupancy
+  // the logic here is we have the array size of the rows in game
+  // everytime we see cube in a row, we count
+  // if the row full, we clear
+  // we then drop blocks above the row we just cleared
+
   const rowOccupancy = new Array(Viewport.CANVAS_HEIGHT).fill(0);
 
   // Update the array if there are blocks in the current row
@@ -491,6 +516,7 @@ const clearRow = (s: State): State => {
   const rowToRemove = rowOccupancy.filter((count) => count === Constants.GRID_WIDTH);
   const rowsCleared = rowToRemove.length;
 
+  // we find the index of the row we are removing 
   const removedRowCoordinate = rowOccupancy.reduce((indices, occupancy, rowIndex) => {
     return occupancy === Constants.GRID_WIDTH ? [...indices, rowIndex] : indices;
   }, []);
@@ -516,13 +542,16 @@ const clearRow = (s: State): State => {
   // if we need to clear row, update the allBlocks, move above block,
   // update current score and highscore
   if (rowsCleared > 0) {
+
+    // we filter out to see the block above the row we just clear
     const blockAbove = newAllBlocks.filter((block) => {
       const blockAboveClearedRow = Object.values(block).some((cube) => {
          if (cube) return cube.y < removedRowCoordinate;
       });
       return blockAboveClearedRow;
     });
- 
+    
+    // we filter out to see the block under the row we just clear
     const remainBlocks = newAllBlocks.filter((block) => {
       const blockUnderClearedRow = Object.values(block).some((cube) => {
         if (cube) return cube.y >= removedRowCoordinate;
@@ -530,11 +559,16 @@ const clearRow = (s: State): State => {
      return blockUnderClearedRow;
     });
 
+
+    // in here, we only drop the block above the cleared row ]
+    // and keep the block below intact
+    // and update the score and row cleared
     const newState = {
       ...s,
       allBlocks: dropBlockDownWhenClear(s, blockAbove).concat(remainBlocks),
       score: s.score + rowsCleared * 1000, // Update the score based on cleared rows
       highScore: Math.max(s.highScore, s.score + rowsCleared * 1000),
+      rowCleared: rowsCleared
     };
 
     return newState;
@@ -546,8 +580,10 @@ const clearRow = (s: State): State => {
 const dropBlockDownWhenClear = (s: State, blockToDrop: Array<Tetrominos>): Array<Tetrominos> => {
   const moveDistance = Block.WIDTH;
 
+  // code to drop above blocks down
   return blockToDrop.map((block) => {
     const { cube1, cube2, cube3, cube4 } = block;
+    // perform check to make sure in the screen
     if (Move.isBlockInsideScreen(block, moveDistance, "y") &&
         Move.iscollideWhenMove(s, block, moveDistance, "y")) {
       

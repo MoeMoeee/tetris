@@ -65,6 +65,7 @@ type State = Readonly<{
     highScore: number,
     allBlocks: Array<Tetrominos> | null,
     nextBlock: Tetrominos,
+    rowCleared: number
 }>;
   
 const BlockType = {

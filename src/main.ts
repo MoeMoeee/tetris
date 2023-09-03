@@ -66,14 +66,12 @@ export function main() {
   const down$ = fromKey("KeyS");
   const reset$ = fromKey("KeyR");
   const rotateLeft$ = pressKey('ArrowLeft');
-  const rotateRight$ = pressKey("ArrowRight");
 
   const moveLeft$ = left$.pipe(map(_ => new Move(-Block.WIDTH , "x")));
   const moveRight$ = right$.pipe(map(_ => new Move(Block.WIDTH, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
   const gameReset$ = reset$.pipe(map(_ => new Reset()));
   const rotateLeftAction$ = rotateLeft$.pipe(map(_ => new Rotate()));
-  const rotateRightAction$ = rotateRight$.pipe(map(_ => new Rotate()));
   
       
   /** Determines the rate of time steps */
@@ -155,8 +153,8 @@ export function main() {
     map(randomValue => new GenerateBlock(randomValue)),
     
   );
-  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$,
-    rotateRightAction$, rotateLeftAction$, moveDown$, gameRand$, gameReset$);
+  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$
+                      , rotateLeftAction$, moveDown$, gameRand$, gameReset$);
   const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
   const subscription = 
   state$.subscribe((s: State) => {
