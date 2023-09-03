@@ -15,7 +15,7 @@
 import "./style.css";
 
 import { Observable, concat, fromEvent, interval, merge } from "rxjs";
-import { map, filter, scan, takeWhile, bufferCount, takeUntil, distinctUntilChanged, debounceTime } from "rxjs/operators";
+import { map, filter, scan} from "rxjs/operators";
 import {hide, createSvgElement, createRngStreamFromSource} from "./utils";
 import { Key, Event, Tetrominos, State, Block, Viewport, Constants, Action } from './types'
 import { initialState, reduceState, Rotate, Tick, Move, GenerateBlock, Reset } from './state';
@@ -48,28 +48,33 @@ export function main() {
   /** User input */
 
   const key$ = fromEvent<KeyboardEvent>(document, "keypress");
+  const keypress$ = fromEvent<KeyboardEvent>(document, "keydown");
 
   const fromKey = (keyCode: string) =>
     key$.pipe(
       filter(({ code }) => code === keyCode),
     );
 
-
-
+  const pressKey = (keyCode: string) =>
+    keypress$.pipe(
+    filter(({ code }) => code === keyCode),
+  );
 
   /** Observables */
   const left$ = fromKey("KeyA");
   const right$ = fromKey("KeyD");
   const down$ = fromKey("KeyS");
   const reset$ = fromKey("KeyR");
-
+  const rotateLeft$ = pressKey('ArrowLeft');
+  const rotateRight$ = pressKey("ArrowRight");
 
   const moveLeft$ = left$.pipe(map(_ => new Move(-Block.WIDTH , "x")));
   const moveRight$ = right$.pipe(map(_ => new Move(Block.WIDTH, "x")));
   const moveDown$ = down$.pipe(map(_ => new Move(5, "y")));
   const gameReset$ = reset$.pipe(map(_ => new Reset()));
-
-    
+  const rotateLeftAction$ = rotateLeft$.pipe(map(_ => new Rotate()));
+  const rotateRightAction$ = rotateRight$.pipe(map(_ => new Rotate()));
+  
       
   /** Determines the rate of time steps */
   const tick$ = interval(Constants.TICK_RATE_MS);
@@ -130,7 +135,7 @@ export function main() {
     // Render score
     scoreText.textContent = `${s.score}`;
     highScoreText.textContent = `${s.highScore}`;
-
+    
 
     // Add a block to the preview canvas
     // Object.values(s.nextBlock).forEach(cube => {
@@ -150,7 +155,8 @@ export function main() {
     map(randomValue => new GenerateBlock(randomValue)),
     
   );
-  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$, moveDown$, gameRand$, gameReset$);
+  const action$ : Observable<Action> = merge(gameClock$, moveRight$, moveLeft$,
+    rotateRightAction$, rotateLeftAction$, moveDown$, gameRand$, gameReset$);
   const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));  
   const subscription = 
   state$.subscribe((s: State) => {

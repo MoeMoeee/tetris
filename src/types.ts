@@ -11,7 +11,7 @@ const Viewport = {
 } as const;
   
 const Constants = {
-    TICK_RATE_MS: 8,
+    TICK_RATE_MS: 20,
     SEED: 1,
     GRID_WIDTH: 10,
     GRID_HEIGHT: 20,
@@ -48,6 +48,7 @@ type Cube = {
     y: number,
     shape: "I" | "J" | "L" | "O" | "S" | "T" | "Z",
     color: CubeColor,
+    orientation: number
 };
 
 type Tetrominos = Readonly<{
@@ -67,22 +68,22 @@ type State = Readonly<{
 }>;
   
 const BlockType = {
-    O:  {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Yellow},
-        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S", color: CubeColor.Yellow}, 
-        cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow},
-        cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow}
+    O:  {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Yellow,  orientation: 0},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "S", color: CubeColor.Yellow,  orientation: 0}, 
+        cube3: {x: 100, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow,  orientation: 0},
+        cube4: {x: 100 - Block.WIDTH, y: Block.HEIGHT, shape: "S", color: CubeColor.Yellow,  orientation: 0}
         },
 
-    I: {cube1: {x: 100, y: 0, shape: "I", color: CubeColor.LightBlue},
-        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue}, 
-        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue},
-        cube4: {x: 100 - 2*Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue}
+    I: {cube1: {x: 100, y: 0, shape: "I", color: CubeColor.LightBlue, orientation: 0},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue, orientation: 0}, 
+        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue, orientation: 0},
+        cube4: {x: 100 - 2*Block.WIDTH, y: 0, shape: "I", color: CubeColor.LightBlue, orientation: 0}
         },
 
-    T: {cube1: {x: 100, y: 0, shape: "T", color: CubeColor.Purple},
-        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple}, 
-        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple},
-        cube4: {x: 100  , y: Block.WIDTH, shape: "T", color: CubeColor.Purple}
+    T: {cube1: {x: 100, y: 0, shape: "T", color: CubeColor.Purple, orientation: 0},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple, orientation: 0}, 
+        cube3: {x: 100 + Block.WIDTH, y: 0, shape: "T", color: CubeColor.Purple, orientation: 0},
+        cube4: {x: 100  , y: Block.WIDTH, shape: "T", color: CubeColor.Purple, orientation: 0}
         },
 
     J: {cube1: {x: 100, y: 0, shape: "J", color: CubeColor.Blue},

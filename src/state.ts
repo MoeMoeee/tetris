@@ -1,5 +1,5 @@
 import { Action, Block, Constants, Cube, State, Tetrominos, Viewport } from "./types";
-import {  createTetro, isEndGame } from "./utils";
+import {  Vec, createTetro, isEndGame } from "./utils";
 
 export { initialState, reduceState, Rotate, Tick, Move, GenerateBlock, Reset}
 
@@ -61,7 +61,7 @@ class Move implements Action {
   static isBlockInsideScreen = (block: Tetrominos, moveDistance: number, axis: string): boolean => {
     const { cube1, cube2, cube3, cube4 } = block;
   
-    // Check the boundary of x coordinates (ignores null cubes)
+    // Check the boundary of x coordinates 
     const xBoundaryCheck = (
       (!cube1 || (cube1.x + moveDistance >= 0 && cube1.x + moveDistance < Viewport.CANVAS_WIDTH - 15)) &&
       (!cube2 || (cube2.x + moveDistance >= 0 && cube2.x + moveDistance < Viewport.CANVAS_WIDTH - 15)) &&
@@ -69,7 +69,7 @@ class Move implements Action {
       (!cube4 || (cube4.x + moveDistance >= 0 && cube4.x + moveDistance < Viewport.CANVAS_WIDTH - 15))
     );
   
-    // Check the boundary of y coordinates (ignores null cubes)
+    // Check the boundary of y coordinates
     const yBoundaryCheck = (
       (!cube1 || cube1.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
       (!cube2 || cube2.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
@@ -108,6 +108,9 @@ class Move implements Action {
     const shouldMoveBlock = () => 
       Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) && 
       !this.iscollideWhenMove(s, s.currentBlock, moveDistance, axis);
+    
+    // console.log(Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) );
+    // console.log(!this.iscollideWhenMove(s, s.currentBlock, moveDistance, axis));
     
     // execute the move
     const moveCubes = (block: Tetrominos) => ({
@@ -216,14 +219,184 @@ class Tick implements Action {
     return clearRow(Tick.detectCollisions(isEndGame((Tick.moveTetroDown(s)))));
   };
 }
+  class Rotate implements Action {
+    apply(s: State): State {
+      const { currentBlock } = s;
+  
+      const checkValid = (currentBlock && currentBlock.cube1 && currentBlock.cube2 && currentBlock.cube3 && currentBlock.cube4)
+  
+      if (checkValid && currentBlock.cube1.shape === "I") {
+        const rotatedBlock = Rotate.rotateI(currentBlock);
+        if (rotatedBlock !== null) {
+          return { ...s, currentBlock: rotatedBlock };
+        }
+      }
+
+      if (checkValid && currentBlock.cube1.shape === "T") {
+        const rotatedBlock = Rotate.rotateT(currentBlock);
+        if (rotatedBlock !== null) {
+          return { ...s, currentBlock: rotatedBlock };
+        }
+      }
+
+      if (checkValid && currentBlock.cube1.shape === "Z") {
+        const rotatedBlock = Rotate.rotateZ(currentBlock);
+        if (rotatedBlock !== null) {
+          return { ...s, currentBlock: rotatedBlock };
+        }
+      }
+  
+      return s; // Return the original state if rotation is not possible
+    }
+
+  
+
+    static rotateI = (currentBlock: Tetrominos): Tetrominos | null => {
+      // Check if currentBlock or any of its cubes are null
+      if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
+        return null;
+      }
+      
+      if (currentBlock.cube1.orientation === 0) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 1},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x, y: currentBlock.cube1.y + Block.HEIGHT, orientation: 1},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x, y: currentBlock.cube1.y + 2*Block.HEIGHT, orientation: 1},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x, y: currentBlock.cube1.y + 3*Block.HEIGHT, orientation: 1},
+        };
+      
+        return newBlock;
+      }
+      else {
+        const newBlock: Tetrominos = {
+            cube1: {...currentBlock.cube1, orientation: 0},
+            cube2: {...currentBlock.cube2, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+            cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + 2*Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+            cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + 3*Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+          };
+
+        return newBlock;
+
+      }
+    };
+
+    static rotateT = (currentBlock: Tetrominos): Tetrominos | null => {
+      // Check if currentBlock or any of its cubes are null
+      if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
+        return null;
+      }
+      
+      if (currentBlock.cube1.orientation === 0) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 1},
+          cube2: {...currentBlock.cube2, orientation: 1},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x, y: currentBlock.cube1.y  - Block.HEIGHT , orientation: 1},
+          cube4: {...currentBlock.cube4, orientation: 1},
+        };
+      
+        return newBlock;
+      }
+
+      if (currentBlock.cube1.orientation === 1) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 2},
+          cube2: {...currentBlock.cube2, orientation: 2},
+          cube3: {...currentBlock.cube3, orientation: 2},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 2},
+        };
+      
+        return newBlock;
+      }
 
 
-class Rotate implements Action {
-  // TODO
-  apply = (s: State) => {
-    return s;
-  };
-};
+      else if (currentBlock.cube1.orientation === 2){
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 3},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x , y: currentBlock.cube1.y + Block.HEIGHT, orientation: 3},
+          cube3: {...currentBlock.cube3, orientation: 3},
+          cube4: {...currentBlock.cube4, orientation: 3},
+        };
+
+        return newBlock;
+
+      }
+
+      else {
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 0},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x - Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y , orientation: 0},
+          cube4: {...currentBlock.cube4, y: currentBlock.cube1.y + Block.HEIGHT,  x: currentBlock.cube1.x ,orientation: 0},
+        };
+
+        return newBlock;
+      }
+    };
+
+    static rotateZ = (currentBlock: Tetrominos): Tetrominos | null => {
+      // Check if currentBlock or any of its cubes are null
+      if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
+        return null;
+      }
+      
+      if (currentBlock.cube1.orientation === 0) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 1},
+          cube2: {...currentBlock.cube2, orientation: 1},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x, y: currentBlock.cube1.y  - Block.HEIGHT , orientation: 1},
+          cube4: {...currentBlock.cube4, orientation: 1},
+        };
+      
+        return newBlock;
+      }
+
+      if (currentBlock.cube1.orientation === 1) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 2},
+          cube2: {...currentBlock.cube2, orientation: 2},
+          cube3: {...currentBlock.cube3, orientation: 2},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 2},
+        };
+      
+        return newBlock;
+      }
+
+
+      else if (currentBlock.cube1.orientation === 2){
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 3},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x , y: currentBlock.cube1.y + Block.HEIGHT, orientation: 3},
+          cube3: {...currentBlock.cube3, orientation: 3},
+          cube4: {...currentBlock.cube4, orientation: 3},
+        };
+
+        return newBlock;
+
+      }
+
+      else {
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 0},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x - Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y , orientation: 0},
+          cube4: {...currentBlock.cube4, y: currentBlock.cube1.y + Block.HEIGHT,  x: currentBlock.cube1.x ,orientation: 0},
+        };
+
+        return newBlock;
+      }
+    };
+  }
+
 
 class GenerateBlock implements Action {
   constructor(public readonly random: number) { }
@@ -277,7 +450,7 @@ const clearRow = (s: State): State => {
   const rowToRemove = rowOccupancy.filter((count) => count === Constants.GRID_WIDTH);
   const rowsCleared = rowToRemove.length;
 
-  const removedRows = rowOccupancy.reduce((indices, occupancy, rowIndex) => {
+  const removedRowCoordinate = rowOccupancy.reduce((indices, occupancy, rowIndex) => {
     return occupancy === Constants.GRID_WIDTH ? [...indices, rowIndex] : indices;
   }, []);
 
@@ -304,14 +477,14 @@ const clearRow = (s: State): State => {
   if (rowsCleared > 0) {
     const blockAbove = newAllBlocks.filter((block) => {
       const blockAboveClearedRow = Object.values(block).some((cube) => {
-         if (cube) return cube.y < removedRows;
+         if (cube) return cube.y < removedRowCoordinate;
       });
       return blockAboveClearedRow;
     });
  
     const remainBlocks = newAllBlocks.filter((block) => {
       const blockUnderClearedRow = Object.values(block).some((cube) => {
-        if (cube) return cube.y >= removedRows;
+        if (cube) return cube.y >= removedRowCoordinate;
      });
      return blockUnderClearedRow;
     });
