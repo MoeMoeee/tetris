@@ -156,7 +156,8 @@ export function main() {
   state$.subscribe((s: State) => {
     if (s.gameEnd) {
       show(gameover);
-    } else {
+    } 
+    else {
       render(s);
 
       hide(gameover);

@@ -16,7 +16,7 @@ allBlocks: null,
 nextBlock: createTetro(1),
 } as const;
 
-
+// class construction based on readings!
 class Move implements Action {
   constructor(public readonly moveDistance: number, public readonly axis: string) { } 
 
@@ -118,6 +118,7 @@ class Move implements Action {
       {
         // create a new block and added the new block to the current block array
         const newBlock = s.nextBlock;
+        // append the new block to the all blocks array
         const allBlocks = s.allBlocks === null ? [s.currentBlock] : [...s.allBlocks, s.currentBlock];
         return { ...s, allBlocks, currentBlock: newBlock };
       } 
@@ -218,7 +219,7 @@ class GenerateBlock implements Action {
 
 
   apply = (s: State) => {    
-    const newBlock = createTetro(this.random); // Use the first value in the array
+    const newBlock = createTetro(this.random); 
     return { ...s, nextBlock: newBlock };
   };
 }
@@ -266,7 +267,6 @@ const clearRow = (s: State): State => {
   const rowsCleared = rowToRemove.length;
 
   // Filter out rows that are not fully occupied
-  // Filter out rows that are not fully occupied
   const newAllBlocks = allBlocks.map((block: Tetrominos) => {
     const cubes = Object.values(block).filter((cube) =>
       cube !== null && rowOccupancy[cube!.y] !== Constants.GRID_WIDTH 
@@ -284,11 +284,23 @@ const clearRow = (s: State): State => {
   });
 
 
-  // if we need to clear row, update the allBlocks, current score and 
+  // if we need to clear row, update the allBlocks, move above block,
+  // update current score and highscore
   if (rowsCleared > 0) {
+
+    const updatedAllBlocks = newAllBlocks.map((block: Tetrominos) => {
+      const updatedBlock: Tetrominos = {
+        cube1: block.cube1 ? Move.moveCube(block.cube1, rowsCleared*Block.WIDTH, "y") : null,
+        cube2: block.cube2 ? Move.moveCube(block.cube2, rowsCleared*Block.WIDTH, "y") : null,
+        cube3: block.cube3 ? Move.moveCube(block.cube3, rowsCleared*Block.WIDTH, "y") : null,
+        cube4: block.cube4 ? Move.moveCube(block.cube4, rowsCleared*Block.WIDTH, "y") : null,
+      };
+      return updatedBlock;
+    });
+    
     const newState = {
       ...s,
-      allBlocks: newAllBlocks,
+      allBlocks: updatedAllBlocks,
       score: s.score + rowsCleared * 1000, // Update the score based on cleared rows
       highScore: Math.max(s.highScore, s.score + rowsCleared * 1000),
     };
@@ -298,8 +310,6 @@ const clearRow = (s: State): State => {
 
   return s;
 };
-
-
 
 
 
