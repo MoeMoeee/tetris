@@ -76,7 +76,8 @@ class Move implements Action {
       (!cube3 || cube3.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15) &&
       (!cube4 || cube4.y + moveDistance <= Viewport.CANVAS_HEIGHT - 15)
     );
-  
+    
+    // check the boundary of based on the axis x/y
     if (axis === 'x') {
       return xBoundaryCheck;
     } else if (axis === 'y') {
@@ -108,9 +109,6 @@ class Move implements Action {
     const shouldMoveBlock = () => 
       Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) && 
       !this.iscollideWhenMove(s, s.currentBlock, moveDistance, axis);
-    
-    // console.log(Move.isBlockInsideScreen(s.currentBlock, moveDistance + 4, axis) );
-    // console.log(!this.iscollideWhenMove(s, s.currentBlock, moveDistance, axis));
     
     // execute the move
     const moveCubes = (block: Tetrominos) => ({
@@ -245,6 +243,13 @@ class Tick implements Action {
           return { ...s, currentBlock: rotatedBlock };
         }
       }
+
+      if (checkValid && currentBlock.cube1.shape === "J") {
+        const rotatedBlock = Rotate.rotateJ(currentBlock);
+        if (rotatedBlock !== null) {
+          return { ...s, currentBlock: rotatedBlock };
+        }
+      }
   
       return s; // Return the original state if rotation is not possible
     }
@@ -350,58 +355,94 @@ class Tick implements Action {
         // Create a new Tetrominos object with the rotated cubes
         const newBlock: Tetrominos = {
           cube1: {...currentBlock.cube1, orientation: 1},
-          cube2: {...currentBlock.cube2, orientation: 1},
-          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x, y: currentBlock.cube1.y  - Block.HEIGHT , orientation: 1},
-          cube4: {...currentBlock.cube4, orientation: 1},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x + Block.HEIGHT, orientation: 1},
+          cube3: {...currentBlock.cube3, orientation: 1},
+          cube4: {...currentBlock.cube4,  x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y - Block.HEIGHT ,orientation: 1},
+        };
+      
+        return newBlock;
+      }
+
+      else {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 0},
+          cube2: {...currentBlock.cube2,  x: currentBlock.cube1.x - Block.HEIGHT, orientation: 0},
+          cube3: {...currentBlock.cube3, orientation: 0},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y + Block.WIDTH , orientation: 0},
+        };
+      
+        return newBlock;
+      }
+    }
+
+    static rotateJ = (currentBlock: Tetrominos): Tetrominos | null => {
+      // Check if currentBlock or any of its cubes are null
+      if (!currentBlock || !currentBlock.cube1 || !currentBlock.cube2 || !currentBlock.cube3 || !currentBlock.cube4) {
+        return null;
+      }
+      
+      if (currentBlock.cube1.orientation === 0) {
+
+        // Create a new Tetrominos object with the rotated cubes
+        const newBlock: Tetrominos = {
+          cube1: {...currentBlock.cube1, orientation: 1},
+          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y - Block.HEIGHT, orientation: 1},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + Block.HEIGHT, orientation: 1},
+          cube4: {...currentBlock.cube4,  x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y - 2*Block.HEIGHT ,orientation: 1},
         };
       
         return newBlock;
       }
 
       if (currentBlock.cube1.orientation === 1) {
+        
 
         // Create a new Tetrominos object with the rotated cubes
         const newBlock: Tetrominos = {
           cube1: {...currentBlock.cube1, orientation: 2},
-          cube2: {...currentBlock.cube2, orientation: 2},
-          cube3: {...currentBlock.cube3, orientation: 2},
-          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 2},
+          cube2: {...currentBlock.cube2,  x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 2},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + 2*Block.HEIGHT, y: currentBlock.cube1.y, orientation: 2},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x , y: currentBlock.cube1.y - Block.WIDTH , orientation: 2},
         };
       
         return newBlock;
       }
 
-
-      else if (currentBlock.cube1.orientation === 2){
+      if (currentBlock.cube1.orientation === 2) {
+        // Create a new Tetrominos object with the rotated cubes
         const newBlock: Tetrominos = {
           cube1: {...currentBlock.cube1, orientation: 3},
-          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x , y: currentBlock.cube1.y + Block.HEIGHT, orientation: 3},
-          cube3: {...currentBlock.cube3, orientation: 3},
-          cube4: {...currentBlock.cube4, orientation: 3},
+          cube2: {...currentBlock.cube2,  x: currentBlock.cube1.x , y: currentBlock.cube1.y -  Block.WIDTH, orientation: 3},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x, y: currentBlock.cube1.y -  2*Block.WIDTH, orientation: 3},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + Block.HEIGHT , y: currentBlock.cube1.y - 2*Block.WIDTH , orientation: 3},
         };
-
+      
         return newBlock;
-
       }
 
       else {
+        // Create a new Tetrominos object with the rotated cubes
         const newBlock: Tetrominos = {
           cube1: {...currentBlock.cube1, orientation: 0},
-          cube2: {...currentBlock.cube2, x: currentBlock.cube1.x - Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
-          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y , orientation: 0},
-          cube4: {...currentBlock.cube4, y: currentBlock.cube1.y + Block.HEIGHT,  x: currentBlock.cube1.x ,orientation: 0},
+          cube2: {...currentBlock.cube2,  x: currentBlock.cube1.x + Block.HEIGHT, y: currentBlock.cube1.y, orientation: 0},
+          cube3: {...currentBlock.cube3, x: currentBlock.cube1.x +  2*Block.HEIGHT, y: currentBlock.cube1.y , orientation: 0},
+          cube4: {...currentBlock.cube4, x: currentBlock.cube1.x + 2*Block.HEIGHT , y: currentBlock.cube1.y + Block.WIDTH , orientation: 0},
         };
-
+      
         return newBlock;
       }
-    };
+    }
   }
 
 
 class GenerateBlock implements Action {
   constructor(public readonly random: number) { }
 
-
+  // every time we got the value from 
+  // the random number generator
+  // we create a new tetro and store in the next block
   apply = (s: State) => {    
     const newBlock = createTetro(this.random); 
     return { ...s, nextBlock: newBlock };

@@ -11,29 +11,21 @@ const createTetro = (random: number) => {
   const scaleRandom = RNG.scale(RNG.hash(random));
   
   // create certain blocks based on the random number
-  if (scaleRandom >= -1 && scaleRandom < -0.9) {
-    return BlockType.O;
+  if (scaleRandom >= -1 && scaleRandom < -0.8) {
+    return BlockType.I;
   } 
-  // else if (scaleRandom >= -0.9 && scaleRandom < -0.8) {
-  //   return BlockType.O;
-  // } 
-  // else if (scaleRandom >= -0.8 && scaleRandom < -0.7) {
-  //   return BlockType.T;
-  // } 
-  // else if (scaleRandom >= -0.7 && scaleRandom < -0.6) {
-  //   return BlockType.J;
-  // } 
-  // else if (scaleRandom >= -0.6 && scaleRandom < -0.5) {
-  //   return BlockType.L;
-  // } 
-  // else if (scaleRandom >= -0.5 && scaleRandom < -0.4) {
-  //   return BlockType.S;
-  // } 
-  // else if (scaleRandom >= -0.4 && scaleRandom < -0.3) {
-  //   return BlockType.Z;
-  // } 
+  else if (scaleRandom >= -0.8 && scaleRandom < -0.6) {
+    return BlockType.T;
+  } 
+  else if (scaleRandom >= -0.6 && scaleRandom < -0.4) {
+    return BlockType.Z;
+  } 
+  else if (scaleRandom >= -0.4 && scaleRandom < -0.2) {
+    return BlockType.J;
+  } 
+
   else {
-    return BlockType.T; 
+    return BlockType.O; 
   }
 };
 

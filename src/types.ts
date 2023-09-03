@@ -86,28 +86,16 @@ const BlockType = {
         cube4: {x: 100  , y: Block.WIDTH, shape: "T", color: CubeColor.Purple, orientation: 0}
         },
 
-    J: {cube1: {x: 100, y: 0, shape: "J", color: CubeColor.Blue},
-        cube2: {x: 100, y: Block.WIDTH, shape: "J", color: CubeColor.Blue}, 
-        cube3: {x: 100, y: 2*Block.WIDTH, shape: "J", color: CubeColor.Blue},
-        cube4: {x: 100 - Block.WIDTH  , y: 2*Block.WIDTH, shape: "J", color: CubeColor.Blue}
-        },
-
-    L: {cube1: {x: 100, y: 0, shape: "L", color: CubeColor.Orange},
-        cube2: {x: 100, y: Block.WIDTH, shape: "L", color: CubeColor.Orange}, 
-        cube3: {x: 100, y: 2*Block.WIDTH, shape: "L", color: CubeColor.Orange},
-        cube4: {x: 100 + Block.WIDTH  , y: 2*Block.WIDTH, shape: "L", color: CubeColor.Orange}
+    J: {cube1: {x: 100, y: 0, shape: "J", color: CubeColor.Blue, orientation: 0},
+        cube2: {x: 100 + Block.WIDTH, y: 0, shape: "J", color: CubeColor.Blue, orientation: 0}, 
+        cube3: {x: 100 + 2*Block.WIDTH, y: 0, shape: "J", color: CubeColor.Blue, orientation: 0},
+        cube4: {x: 100 + 2*Block.WIDTH, y: Block.WIDTH, shape: "J", color: CubeColor.Blue, orientation: 0}
         },
     
-    S: {cube1: {x: 100, y: 0, shape: "S", color: CubeColor.Green},
-        cube2: {x: 100 + Block.WIDTH, y: 0, shape: "S", color: CubeColor.Green}, 
-        cube3: {x: 100, y: Block.WIDTH, shape: "S", color: CubeColor.Green},
-        cube4: {x: 100 - Block.WIDTH  , y: Block.WIDTH, shape: "S", color: CubeColor.Green}
-        },
-    
-    Z: {cube1: {x: 100, y: 0, shape: "Z", color: CubeColor.Red},
-        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "Z", color: CubeColor.Red}, 
-        cube3: {x: 100, y: Block.WIDTH, shape: "Z", color: CubeColor.Red},
-        cube4: {x: 100 + Block.WIDTH  , y: Block.WIDTH, shape: "Z", color: CubeColor.Red}
+    Z: {cube1: {x: 100, y: 0, shape: "Z", color: CubeColor.Red, orientation: 0},
+        cube2: {x: 100 - Block.WIDTH, y: 0, shape: "Z", color: CubeColor.Red, orientation: 0}, 
+        cube3: {x: 100, y: Block.WIDTH, shape: "Z", color: CubeColor.Red, orientation: 0},
+        cube4: {x: 100 + Block.WIDTH  , y: Block.WIDTH, shape: "Z", color: CubeColor.Red, orientation: 0}
         },
 
 } as const;
